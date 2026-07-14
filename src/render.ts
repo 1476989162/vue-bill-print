@@ -120,10 +120,10 @@ const isNumericType = (type: string): boolean => {
   return t === 'number' || t === 'decimal' || t === 'float' || t === 'double' || t === 'int' || t === 'integer';
 };
 
-const formatCellValue = (val: unknown, type: string, decimalPlaces?: number | null): string => {
+const formatCellValue = (val: unknown, type: string, decimalPlaces?: number | null, dateFormat?: string): string => {
   if (val == null || val === '') return '';
-  if (type === 'Date') return formatDateValue(String(val), false);
-  if (type === 'DateTime') return formatDateValue(String(val), true);
+  if (type === 'Date') return formatDateValue(String(val), false, dateFormat);
+  if (type === 'DateTime') return formatDateValue(String(val), true, dateFormat);
   if (isNumericType(type) || (decimalPlaces != null && decimalPlaces >= 0)) {
     const n = Number(val);
     if (!Number.isFinite(n)) return String(val);
@@ -396,8 +396,9 @@ const pageContentHeightPx = (cfg: PrintTemplateConfig): number =>
  * - 100% 原尺寸，不做自动缩放（针式/自定义纸 S1:241×93.1 必须实际大小）
  */
 const buildPrintStyles = (cfg: PrintTemplateConfig): string => {
-  const pw = cfg.paper.width;
-  const ph = cfg.paper.height;
+  const landscape = cfg.paper.orientation === 'landscape';
+  const pw = landscape ? cfg.paper.height : cfg.paper.width;
+  const ph = landscape ? cfg.paper.width : cfg.paper.height;
   const mt = cfg.paper.marginTop;
   const mr = cfg.paper.marginRight;
   const mb = cfg.paper.marginBottom;
@@ -444,7 +445,7 @@ const buildFieldsHtml = (
 ): string =>
   cfg.headerFields.filter(f => (f.section || 'header') === section).map(f => {
     const type = getHeaderType(f.key, data);
-    const val = formatCellValue(data.Tb?.[f.key], type);
+    const val = formatCellValue(data.Tb?.[f.key], type, f.decimalPlaces, f.dateFormat);
     const label = f.showLabel ? `<span style="color:#666;font-size:${f.fontSize - 1}pt">${f.title}：</span>` : '';
     return `<div style="position:absolute;left:${f.left}pt;top:${f.top + topDelta}pt;font-size:${f.fontSize}pt;width:${f.width}pt;font-weight:${f.bold ? 'bold' : 'normal'};text-align:${f.align};white-space:nowrap;overflow:hidden">${label}<span>${val}</span></div>`;
   }).join('\n  ');

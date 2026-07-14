@@ -1,7 +1,42 @@
 ﻿<script setup lang="ts">
-import { ref, computed } from 'vue';
-import { PrintDesigner, printBill } from 'vue-bill-print';
+import { ref, computed, watch } from 'vue';
+import { PrintDesigner, printBill, getLocale, setLocale } from 'vue-bill-print';
 import { sampleOutbound, samplePurchase, sampleInbound } from './sampleData';
+
+const demoI18n: Record<string, Record<string, string>> = {
+  'zh-CN': {
+    'demo.openSource': '开源骨架',
+    'demo.lead': 'Vue 3 单据打印设计器骨架：拖拽设计、自定义纸张（含针式）、按页类型分页、纯 HTML 打印。',
+    'demo.print': '直接打印（printBill）',
+    'demo.printing': '准备打印…',
+    'demo.hideDesigner': '隐藏设计器',
+    'demo.showDesigner': '显示设计器',
+    'demo.steps': '试用步骤',
+    'demo.step1': '在设计器里调整纸张 / 字段 / 每页行数',
+    'demo.step2': '点「保存」（写入 localStorage）',
+    'demo.step3': '点「预览」或上方「直接打印」',
+    'demo.step4': 'Chrome 打印边距选「无」',
+    'demo.lang': '语言',
+  },
+  'en': {
+    'demo.openSource': 'Open source skeleton',
+    'demo.lead': 'Vue 3 bill print designer skeleton: drag to design, custom paper (incl. dot-matrix), paginate by page type, pure HTML printing.',
+    'demo.print': 'Print directly (printBill)',
+    'demo.printing': 'Preparing…',
+    'demo.hideDesigner': 'Hide Designer',
+    'demo.showDesigner': 'Show Designer',
+    'demo.steps': 'Try it out',
+    'demo.step1': 'Adjust paper / fields / rows-per-page in the designer',
+    'demo.step2': 'Click "Save" (writes to localStorage)',
+    'demo.step3': 'Click "Preview" or "Print directly" above',
+    'demo.step4': 'In Chrome print dialog, set margins to "None"',
+    'demo.lang': 'Language',
+  },
+};
+const demoT = (key: string) => (demoI18n[getLocale()] || demoI18n['zh-CN'])[key] || key;
+
+const currentLocale = ref(getLocale());
+watch(currentLocale, (v) => setLocale(v as 'zh-CN' | 'en'));
 
 const templates = [
     { key: 'outbound', label: '销售出库', data: sampleOutbound },
@@ -28,32 +63,35 @@ const onPrint = async () => {
   <div class="page">
     <header class="hero">
       <div>
-        <p class="eyebrow">Open source skeleton</p>
+        <p class="eyebrow">{{ demoT('demo.openSource') }}</p>
         <h1>vue-bill-print</h1>
-        <p class="lead">
-          Vue 3 单据打印设计器骨架：拖拽设计、自定义纸张（含针式）、按页类型分页、纯 HTML 打印。
-        </p>
+        <p class="lead">{{ demoT('demo.lead') }}</p>
         <div class="actions">
           <button class="btn primary" :disabled="printing" @click="onPrint">
-            {{ printing ? '准备打印…' : '直接打印（printBill）' }}
+            {{ printing ? demoT('demo.printing') : demoT('demo.print') }}
           </button>
           <div class="template-switcher">
           <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="curTpl = tpl.key">{{ tpl.label }}</button>
         </div>
           <button class="btn" @click="showDesigner = !showDesigner">
-            {{ showDesigner ? '隐藏设计器' : '显示设计器' }}
+            {{ showDesigner ? demoT('demo.hideDesigner') : demoT('demo.showDesigner') }}
           </button>
         </div>
       </div>
       <aside class="tips">
-        <strong>试用步骤</strong>
+        <strong>{{ demoT('demo.steps') }}</strong>
         <ol>
-          <li>在设计器里调整纸张 / 字段 / 每页行数</li>
-          <li>点「保存」（写入 localStorage）</li>
-          <li>点「预览」或上方「直接打印」</li>
-          <li>Chrome 打印边距选「无」</li>
+          <li>{{ demoT('demo.step1') }}</li>
+          <li>{{ demoT('demo.step2') }}</li>
+          <li>{{ demoT('demo.step3') }}</li>
+          <li>{{ demoT('demo.step4') }}</li>
         </ol>
       </aside>
+      <div class="lang-switch">
+        <span class="text-xs text-gray-500">{{ demoT('demo.lang') }}:</span>
+        <button class="btn xs" :class="{ primary: currentLocale === 'zh-CN' }" @click="currentLocale = 'zh-CN'">中文</button>
+        <button class="btn xs" :class="{ primary: currentLocale === 'en' }" @click="currentLocale = 'en'">EN</button>
+      </div>
     </header>
 
     <section v-if="showDesigner" class="designer-wrap">
@@ -128,16 +166,18 @@ h1 {
   line-height: 1.7;
 }
 .designer-wrap {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 8px;
-  min-height: 70vh;
+  height: calc(100vh - 220px);
+  min-height: 520px;
   overflow: hidden;
 }
 .template-switcher { display: flex; gap: 8px; }
+.lang-switch { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+.btn.xs { padding: 4px 10px; font-size: 12px; }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
 }

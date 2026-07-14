@@ -14,6 +14,12 @@ export const createLocalStorageStore = (prefix = LS_PREFIX): TemplateStore => ({
   async save(formType: string, templateJson: string) {
     localStorage.setItem(prefix + formType, templateJson);
   },
+  async remove(formType: string): Promise<boolean> {
+    const key = prefix + formType;
+    const had = localStorage.getItem(key) != null;
+    localStorage.removeItem(key);
+    return had;
+  },
 });
 
 let globalConfig: VueBillPrintConfig = {

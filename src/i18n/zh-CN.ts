@@ -19,6 +19,20 @@ export const zhCN: Record<string, string> = {
   'toolbar.singleLe': '单页≤',
   'toolbar.continuationLe': '续页≤',
   'toolbar.singleHint': '单页含头尾约 {0} 行；续页无表头约 {1} 行',
+  'toolbar.save': '保存',
+  'toolbar.load': '加载',
+  'toolbar.preview': '预览',
+  'toolbar.viewJson': '查看 JSON',
+  'actions.resetSample': '重置示例',
+  'json.title': '模板配置 JSON',
+  'json.copy': '复制',
+  'json.close': '关闭',
+  'json.hint': '这是当前设计器的配置数据结构，可直接用作 vue-bill-print 的 config',
+  'toolbar.repeatHeader': '表头每页重复',
+  'toolbar.repeatColHeader': '列名每页重复',
+  'toolbar.gapGuide': '间距辅助线',
+  'toolbar.gapGuideTitle': '显示标题与表格间距辅助线',
+  'toolbar.overflowWarn': '表宽超出可打印区 {0}pt，内容可能被裁剪',
 
   // ---- 左侧面板 ----
   'panel.headerFields': '表头字段',
@@ -43,6 +57,8 @@ export const zhCN: Record<string, string> = {
   'props.docName': '单据名称',
   'props.name': '名称',
   'props.fontSize': '字号',
+  'props.docTitle': '单据标题',
+  'props.docTitleHint': '拖拽标题移动；宽度=0 为通栏居中',
 
   // ---- 分区编辑 ----
   'section.label': '分区：{0}',
@@ -62,6 +78,7 @@ export const zhCN: Record<string, string> = {
   'table.rowH': '行高',
   'table.widthInfo': '表宽 {0}mm；可打印 {1}mm',
   'table.hint': '预览/打印按「上」值定位明细表，1pt≈0.35mm',
+  'table.gapNote': '若打印页底留白过多，多半是「上」偏大（表格偏下）；把表格往上拖或减小「上」后保存。',
   'table.titleGapWarn': '标题可能覆盖表格上方，建议标题字号≥{0}',
   'table.titleGapOk': '与标题间距 {0}pt（约 {1}mm）',
 
@@ -77,6 +94,11 @@ export const zhCN: Record<string, string> = {
   'field.sectionFooter': '下部分',
   'field.bold': '加粗',
   'field.showLabel': '标签',
+  'field.decimalPlaces': '小数位',
+  'field.decimalHint': '数值字段保留小数位数（0~6）',
+  'field.decimalHintShort': '空=不强制',
+  'field.dateFormat': '日期格式',
+  'field.dateFormatHint': 'YYYY=年 MM=月 DD=日 HH=时 mm=分 ss=秒',
   'field.align': '对齐',
   'field.alignLeft': '左',
   'field.alignCenter': '中',
@@ -109,6 +131,7 @@ export const zhCN: Record<string, string> = {
   'free.section': '分区',
   'free.contentHint': '内容支持 {字段名} 占位符，打印时替换为表头字段值',
   'free.delete': '删除',
+  'free.textDefault': '文本',
 
   // ---- 模板分区列表 ----
   'tpl.panels': '模板分区',
@@ -140,6 +163,9 @@ export const zhCN: Record<string, string> = {
   'notify.saveSuccess': '模板保存成功',
   'notify.saveFailed': '保存失败: {0}',
   'notify.loadSuccess': '模板加载成功',
+  'notify.resetOk': '已重置为示例模板',
+  'notify.copied': '已复制到剪贴板',
+  'notify.copyFailed': '复制失败',
   'notify.loadFailed': '加载失败: {0}',
   'notify.templateNotFound': '未找到模板',
   'notify.noData': '无数据',

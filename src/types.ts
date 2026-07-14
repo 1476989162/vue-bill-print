@@ -91,6 +91,10 @@ export interface HeaderFieldConfig {
   align: 'left' | 'center' | 'right';
   showLabel: boolean;
   section?: PrintSectionKey;
+  /** Force decimal places for numeric header values; undefined = no forced format */
+  decimalPlaces?: number | null;
+  /** Date format tokens (YYYY MM DD HH mm ss) for date-type header values */
+  dateFormat?: string;
 }
 
 export interface DetailColumnConfig {
@@ -155,6 +159,8 @@ export interface PrintTemplateConfig {
 export interface TemplateStore {
   load(formType: string): Promise<string | null>;
   save(formType: string, templateJson: string): Promise<void>;
+  /** Remove saved template for a formType (returns true if something was removed) */
+  remove?(formType: string): Promise<boolean>;
 }
 
 export type MessageLevel = 'success' | 'warning' | 'error' | 'info';

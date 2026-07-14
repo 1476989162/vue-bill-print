@@ -19,6 +19,20 @@ export const en: Record<string, string> = {
   'toolbar.singleLe': 'Single≤',
   'toolbar.continuationLe': 'Cont≤',
   'toolbar.singleHint': 'Single page with header/footer approx {0} rows; continuation without header approx {1} rows',
+  'toolbar.save': 'Save',
+  'toolbar.load': 'Load',
+  'toolbar.preview': 'Preview',
+  'toolbar.viewJson': 'View JSON',
+  'actions.resetSample': 'Reset Sample',
+  'json.title': 'Template Config JSON',
+  'json.copy': 'Copy',
+  'json.close': 'Close',
+  'json.hint': 'This is the current designer config structure, usable directly as vue-bill-print config',
+  'toolbar.repeatHeader': 'Repeat header',
+  'toolbar.repeatColHeader': 'Repeat column header',
+  'toolbar.gapGuide': 'Gap guide',
+  'toolbar.gapGuideTitle': 'Show gap guide between title and table',
+  'toolbar.overflowWarn': 'Table width exceeds printable area by {0}pt, content may be clipped',
 
   // ---- Left panel ----
   'panel.headerFields': 'Header Fields',
@@ -43,6 +57,8 @@ export const en: Record<string, string> = {
   'props.docName': 'Doc Title',
   'props.name': 'Name',
   'props.fontSize': 'Font Size',
+  'props.docTitle': 'Doc Title',
+  'props.docTitleHint': 'Drag to move; width=0 means full-width centered',
 
   // ---- Section editing ----
   'section.label': 'Section: {0}',
@@ -62,6 +78,7 @@ export const en: Record<string, string> = {
   'table.rowH': 'Row H',
   'table.widthInfo': 'Table width {0}mm; printable {1}mm',
   'table.hint': 'Preview/Print positions table by its "Top" value, 1pt≈0.35mm',
+  'table.gapNote': 'If the printed page has too much bottom whitespace, "Top" is likely too large (table too low); drag the table up or reduce "Top" then save.',
   'table.titleGapWarn': 'Title may overlap table; suggest title font ≥{0}',
   'table.titleGapOk': 'Title spacing {0}pt (~{1}mm)',
 
@@ -77,6 +94,11 @@ export const en: Record<string, string> = {
   'field.sectionFooter': 'Footer',
   'field.bold': 'Bold',
   'field.showLabel': 'Label',
+  'field.decimalPlaces': 'Decimals',
+  'field.decimalHint': 'Decimal places for numeric fields (0~6)',
+  'field.decimalHintShort': 'empty = auto',
+  'field.dateFormat': 'Date format',
+  'field.dateFormatHint': 'YYYY=year MM=month DD=day HH=hour mm=min ss=sec',
   'field.align': 'Align',
   'field.alignLeft': 'Left',
   'field.alignCenter': 'Center',
@@ -109,6 +131,7 @@ export const en: Record<string, string> = {
   'free.section': 'Section',
   'free.contentHint': 'Content supports {fieldName} placeholders, replaced with header field values at print time',
   'free.delete': 'Delete',
+  'free.textDefault': 'Text',
 
   // ---- Template panels ----
   'tpl.panels': 'Sections',
@@ -140,6 +163,9 @@ export const en: Record<string, string> = {
   'notify.saveSuccess': 'Template saved successfully',
   'notify.saveFailed': 'Save failed: {0}',
   'notify.loadSuccess': 'Template loaded successfully',
+  'notify.resetOk': 'Reset to sample template',
+  'notify.copied': 'Copied to clipboard',
+  'notify.copyFailed': 'Copy failed',
   'notify.loadFailed': 'Load failed: {0}',
   'notify.templateNotFound': 'Template not found',
   'notify.noData': 'No data',
