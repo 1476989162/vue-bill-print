@@ -457,6 +457,7 @@ import type { BackendData, PrintSectionConfig, PrintSectionKey, PrintTemplateCon
 import { normalizeBackendData } from './types';
 import { getStore, emitMessage } from './storage';
 import { getTitleTopPt, DEFAULT_ROWS_PER_PAGE, computeMaxFittingRows, computeContinuationFittingRows, renderFromConfigAsync } from './render';
+import { getBuiltinDefault } from './defaultTemplates';
 import JsBarcode from 'jsbarcode';
 import * as QRCode from 'qrcode';
 
@@ -1038,6 +1039,17 @@ const onKeyDown = (e: KeyboardEvent) => {
   if (handled) e.preventDefault();
 };
 
+// 优先载入内置默认模板（首次打开/重置示例时），无则回退到示例铺字段
+const applyBuiltinOrDefault = () => {
+  const builtin = getBuiltinDefault(props.formType || '');
+  if (builtin) {
+    Object.assign(config, JSON.parse(JSON.stringify(builtin)));
+  } else {
+    seedFromBackend();
+  }
+  normalizeLoadedConfig();
+};
+
 // 从后端数据铺表头/明细字段（仅当无已保存模板或该模板字段为空时）
 const seedFromBackend = () => {
   config.title = props.formType || config.title;
@@ -1061,7 +1073,7 @@ onMounted(async () => {
       }
     }
   } catch { /* use defaults */ }
-  if (!loaded) seedFromBackend();
+  if (!loaded) applyBuiltinOrDefault();
 });
 onUnmounted(() => {
   document.removeEventListener('keydown', onKeyDown);
@@ -1080,8 +1092,7 @@ watch(
     if (hasSaved) return;
     config.headerFields = [];
     config.detailColumns = [];
-    seedFromBackend();
-    normalizeLoadedConfig();
+    applyBuiltinOrDefault();
   }
 );
 
@@ -1090,8 +1101,7 @@ const resetToSample = async () => {
   try { await storeOf()?.remove?.(props.formType); } catch { /* ignore */ }
   config.headerFields = [];
   config.detailColumns = [];
-  seedFromBackend();
-  normalizeLoadedConfig();
+  applyBuiltinOrDefault();
   notify('success', t('notify.resetOk'));
 };
 </script>
