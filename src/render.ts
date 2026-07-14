@@ -1,4 +1,4 @@
-// src/render.ts — HTML template print engine
+﻿// src/render.ts — HTML template print engine
 // 固定 HTML 模板打印：加载模板配置 → 填入数据 → 新窗口打印
 import type { BackendData, FreeElementConfig, PrintTemplateConfig, TemplateStore } from './types';
 import { formatDateValue } from './format';
@@ -39,7 +39,7 @@ const resolveConfigRowPt = (cfg: PrintTemplateConfig): number =>
 
 /** 单行明细高度（px）：布局撑满可用实测，缺省回退配置 */
 const resolveMeasuredRowPx = (cfg: PrintTemplateConfig, measure?: MeasureResult): number =>
-  measure?.measuredRowHeight > 0 ? measure.measuredRowHeight : ptToPx(resolveConfigRowPt(cfg));
+  (measure && measure.measuredRowHeight > 0) ? measure.measuredRowHeight : ptToPx(resolveConfigRowPt(cfg));
 
 /** 明细区高度（pt）= 列名行 + N 行明细 */
 export const computeDetailBodyHeightPt = (

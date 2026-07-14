@@ -1,4 +1,10 @@
-# vue-bill-print
+﻿# vue-bill-print
+
+[![CI](https://github.com/1476989162/vue-bill-print/actions/workflows/ci.yml/badge.svg)](https://github.com/1476989162/vue-bill-print/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/vue-bill-print)](https://www.npmjs.com/package/vue-bill-print)
+[![npm downloads](https://img.shields.io/npm/dm/vue-bill-print)](https://www.npmjs.com/package/vue-bill-print)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 Vue 3 **单据打印设计器**骨架：拖拽设计模板、自定义纸张（含针式短纸）、按页类型分页、纯 HTML 打印（不依赖 hiprint）。
 

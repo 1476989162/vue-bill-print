@@ -1,4 +1,4 @@
-export type {
+﻿export type {
   BackendData,
   FieldMeta,
   PaperConfig,
@@ -41,3 +41,5 @@ export {
 } from './render';
 
 export { default as PrintDesigner } from './PrintDesigner.vue';
+
+import './style.css';

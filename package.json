@@ -20,14 +20,6 @@
     "README.md",
     "LICENSE"
   ],
-  "scripts": {
-    "dev": "pnpm --dir playground dev",
-    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json",
-    "build:lib": "vite build",
-    "playground": "pnpm --dir playground dev",
-    "playground:build": "pnpm --dir playground build",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
-  },
   "peerDependencies": {
     "vue": "^3.4.0"
   },
@@ -36,6 +28,7 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-vue": "^5.2.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
@@ -63,5 +56,18 @@
     "url": "https://github.com/1476989162/vue-bill-print/issues"
   },
   "homepage": "https://github.com/1476989162/vue-bill-print#readme",
-  "packageManager": "pnpm@9.15.0"
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --dir playground dev",
+    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json",
+    "build:lib": "vite build",
+    "playground": "pnpm --dir playground dev",
+    "playground:build": "pnpm --dir playground build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "pnpm run build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
