@@ -1,0 +1,67 @@
+{
+  "name": "vue-bill-print",
+  "version": "0.1.0",
+  "description": "Vue 3 bill print designer: drag-and-drop templates, custom paper (incl. pin/dot-matrix), HTML print without hiprint",
+  "type": "module",
+  "main": "./dist/vue-bill-print.umd.cjs",
+  "module": "./dist/vue-bill-print.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-bill-print.js",
+      "require": "./dist/vue-bill-print.umd.cjs"
+    },
+    "./style.css": "./dist/vue-bill-print.css"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "pnpm --dir playground dev",
+    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly -p tsconfig.build.json",
+    "build:lib": "vite build",
+    "playground": "pnpm --dir playground dev",
+    "playground:build": "pnpm --dir playground build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "jsbarcode": "^3.12.3",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vue": "^3.5.16",
+    "vue-tsc": "^2.2.10"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "print",
+    "bill",
+    "invoice",
+    "designer",
+    "dot-matrix",
+    "template",
+    "html-print"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1476989162/vue-bill-print.git"
+  },
+  "bugs": {
+    "url": "https://github.com/1476989162/vue-bill-print/issues"
+  },
+  "homepage": "https://github.com/1476989162/vue-bill-print#readme",
+  "packageManager": "pnpm@9.15.0"
+}

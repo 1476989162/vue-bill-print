@@ -1,0 +1,5 @@
+/* Optional global helpers when not using UnoCSS utility classes in host app */
+.vue-bill-print-root {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #111827;
+}
