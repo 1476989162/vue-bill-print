@@ -1,16 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { PrintDesigner, printBill } from 'vue-bill-print';
-import { sampleOutbound } from './sampleData';
+import { sampleOutbound, samplePurchase, sampleInbound } from './sampleData';
 
-const formType = '销售出库';
+const templates = [
+    { key: 'outbound', label: '销售出库', data: sampleOutbound },
+    { key: 'purchase', label: '采购订单', data: samplePurchase },
+    { key: 'inbound', label: '采购入库', data: sampleInbound },
+  ] as const;
+  const curTpl = ref<typeof templates[number]['key']>('outbound');
+  const formType = computed(() => templates.find(x => x.key === curTpl.value)!.label);
+  const curData = computed(() => templates.find(x => x.key === curTpl.value)!.data);
 const showDesigner = ref(true);
 const printing = ref(false);
 
 const onPrint = async () => {
   printing.value = true;
   try {
-    await printBill({ formType, data: sampleOutbound });
+    await printBill({ formType: formType.value, data: curData.value });
   } finally {
     printing.value = false;
   }
@@ -30,6 +37,9 @@ const onPrint = async () => {
           <button class="btn primary" :disabled="printing" @click="onPrint">
             {{ printing ? '准备打印…' : '直接打印（printBill）' }}
           </button>
+          <div class="template-switcher">
+          <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="curTpl = tpl.key">{{ tpl.label }}</button>
+        </div>
           <button class="btn" @click="showDesigner = !showDesigner">
             {{ showDesigner ? '隐藏设计器' : '显示设计器' }}
           </button>
@@ -47,7 +57,7 @@ const onPrint = async () => {
     </header>
 
     <section v-if="showDesigner" class="designer-wrap">
-      <PrintDesigner :form-type="formType" :backend-data="sampleOutbound" />
+      <PrintDesigner :form-type="formType" :backend-data="curData" />
     </section>
   </div>
 </template>
@@ -127,6 +137,7 @@ h1 {
   min-height: 70vh;
   overflow: hidden;
 }
+.template-switcher { display: flex; gap: 8px; }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
 }

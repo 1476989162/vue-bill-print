@@ -44,3 +44,88 @@ export const sampleOutbound: BackendData = {
     { Key: '金额', Title: '金额', Type: 'Decimal', Visible: true },
   ],
 };
+
+
+/** Demo purchase order (采购订单) — uses neutral header/details aliases */
+export const samplePurchase: BackendData = {
+  Identify: 2001,
+  header: {
+    单据类型: '采购订单',
+    订单编号: 'CGDD-20260714-001',
+    供应商: '江苏原材料供应有限公司',
+    采购员: '李四',
+    交货仓库: '原料仓',
+    下单日期: '2026-07-14',
+    预计到货: '2026-07-20',
+    备注: '账期 30 天 · 到货验收后入库',
+  },
+  details: [
+    { 物料编码: 'M001', 物料名称: '冷轧钢板', 规格: '1.5mm×1250×2500', 单位: '张', 数量: 50, 单价: 320, 金额: 16000 },
+    { 物料编码: 'M002', 物料名称: '铝型材', 规格: '6063-T5', 单位: 'm', 数量: 200, 单价: 28, 金额: 5600 },
+    { 物料编码: 'M003', 物料名称: '不锈钢管', 规格: 'Φ32×2.0', 单位: 'm', 数量: 120, 单价: 45, 金额: 5400 },
+    { 物料编码: 'M004', 物料名称: '碳钢圆钢', 规格: 'Φ20', 单位: 'kg', 数量: 800, 单价: 6.5, 金额: 5200 },
+    { 物料编码: 'M005', 物料名称: '镀锌板', 规格: '0.8mm', 单位: '张', 数量: 60, 单价: 180, 金额: 10800 },
+    { 物料编码: 'M006', 物料名称: '铜排', 规格: 'TMY-40×4', 单位: 'm', 数量: 30, 单价: 95, 金额: 2850 },
+    { 物料编码: 'M007', 物料名称: '角钢', 规格: 'L50×5', 单位: 'm', 数量: 150, 单价: 22, 金额: 3300 },
+    { 物料编码: 'M008', 物料名称: '工字钢', 规格: 'I16', 单位: 'm', 数量: 40, 单价: 88, 金额: 3520 },
+  ],
+  headerMeta: [
+    { Key: '订单编号', Title: '订单编号', Type: 'String', Visible: true },
+    { Key: '供应商', Title: '供应商', Type: 'String', Visible: true },
+    { Key: '采购员', Title: '采购员', Type: 'String', Visible: true },
+    { Key: '交货仓库', Title: '交货仓库', Type: 'String', Visible: true },
+    { Key: '下单日期', Title: '下单日期', Type: 'Date', Visible: true },
+    { Key: '预计到货', Title: '预计到货', Type: 'Date', Visible: true },
+    { Key: '备注', Title: '备注', Type: 'String', Visible: true },
+  ],
+  detailMeta: [
+    { Key: '物料编码', Title: '编码', Type: 'String', Visible: true },
+    { Key: '物料名称', Title: '名称', Type: 'String', Visible: true },
+    { Key: '规格', Title: '规格', Type: 'String', Visible: true },
+    { Key: '单位', Title: '单位', Type: 'String', Visible: true },
+    { Key: '数量', Title: '数量', Type: 'Number', Visible: true },
+    { Key: '单价', Title: '单价', Type: 'Decimal', Visible: true },
+    { Key: '金额', Title: '金额', Type: 'Decimal', Visible: true },
+  ],
+};
+
+/** Demo stock-in bill (采购入库单) */
+export const sampleInbound: BackendData = {
+  Identify: 3001,
+  Tb: {
+    单据类型: '采购入库单',
+    入库单号: 'RKD-20260714-001',
+    供应商: '江苏原材料供应有限公司',
+    仓库: '原料仓',
+    验收员: '王五',
+    入库日期: '2026-07-20',
+    关联订单: 'CGDD-20260714-001',
+    备注: '全部验收合格',
+  },
+  TbDetail: [
+    { 物料编码: 'M001', 物料名称: '冷轧钢板', 规格: '1.5mm×1250×2500', 单位: '张', 应收: 50, 实收: 50, 金额: 16000 },
+    { 物料编码: 'M002', 物料名称: '铝型材', 规格: '6063-T5', 单位: 'm', 应收: 200, 实收: 198, 金额: 5544 },
+    { 物料编码: 'M003', 物料名称: '不锈钢管', 规格: 'Φ32×2.0', 单位: 'm', 应收: 120, 实收: 120, 金额: 5400 },
+    { 物料编码: 'M004', 物料名称: '碳钢圆钢', 规格: 'Φ20', 单位: 'kg', 应收: 800, 实收: 800, 金额: 5200 },
+    { 物料编码: 'M005', 物料名称: '镀锌板', 规格: '0.8mm', 单位: '张', 应收: 60, 实收: 59, 金额: 10620 },
+    { 物料编码: 'M006', 物料名称: '铜排', 规格: 'TMY-40×4', 单位: 'm', 应收: 30, 实收: 30, 金额: 2850 },
+  ],
+  TbHeaders: [
+    { Key: '入库单号', Title: '入库单号', Type: 'String', Visible: true },
+    { Key: '供应商', Title: '供应商', Type: 'String', Visible: true },
+    { Key: '仓库', Title: '仓库', Type: 'String', Visible: true },
+    { Key: '验收员', Title: '验收员', Type: 'String', Visible: true },
+    { Key: '入库日期', Title: '入库日期', Type: 'Date', Visible: true },
+    { Key: '关联订单', Title: '关联订单', Type: 'String', Visible: true },
+    { Key: '备注', Title: '备注', Type: 'String', Visible: true },
+  ],
+  TbDetailHeaders: [
+    { Key: '物料编码', Title: '编码', Type: 'String', Visible: true },
+    { Key: '物料名称', Title: '名称', Type: 'String', Visible: true },
+    { Key: '规格', Title: '规格', Type: 'String', Visible: true },
+    { Key: '单位', Title: '单位', Type: 'String', Visible: true },
+    { Key: '应收', Title: '应收', Type: 'Number', Visible: true },
+    { Key: '实收', Title: '实收', Type: 'Number', Visible: true },
+    { Key: '金额', Title: '金额', Type: 'Decimal', Visible: true },
+  ],
+};

@@ -1,5 +1,4 @@
 import { createApp } from 'vue';
-import 'virtual:uno.css';
 import App from './App.vue';
 import { configure, createLocalStorageStore } from 'vue-bill-print';
 

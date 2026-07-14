@@ -4,7 +4,7 @@ import UnoCSS from 'unocss/vite';
 import { resolve } from 'node:path';
 
 export default defineConfig({
-  plugins: [vue(), UnoCSS()],
+  plugins: [vue()],
   resolve: {
     alias: {
       'vue-bill-print': resolve(__dirname, '../src/index.ts'),

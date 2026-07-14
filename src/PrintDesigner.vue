@@ -428,6 +428,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import type { BackendData, PrintSectionConfig, PrintSectionKey, PrintTemplateConfig, TemplateStore, MessageLevel } from './types';
+import { normalizeBackendData } from './types';
 import { getStore, emitMessage } from './storage';
 import { getTitleTopPt, DEFAULT_ROWS_PER_PAGE, computeMaxFittingRows, computeContinuationFittingRows, renderFromConfigAsync } from './render';
 import JsBarcode from 'jsbarcode';
@@ -464,8 +465,14 @@ const toggleOrientation = () => {
 };
 
 // 字段列表
-const headerFields = computed(() => (props.backendData?.TbHeaders || []).filter(h => h.Visible !== false).map(h => ({ key: h.Key, title: h.Title, type: h.Type })));
-const detailFields = computed(() => (props.backendData?.TbDetailHeaders || []).filter(h => h.Visible !== false).map(h => ({ key: h.Key, title: h.Title, type: h.Type })));
+const headerFields = computed(() => {
+  const nd = normalizeBackendData(props.backendData);
+  return nd.TbHeaders.filter(h => h.Visible !== false).map(h => ({ key: h.Key, title: h.Title, type: h.Type }));
+});
+const detailFields = computed(() => {
+  const nd = normalizeBackendData(props.backendData);
+  return nd.TbDetailHeaders.filter(h => h.Visible !== false).map(h => ({ key: h.Key, title: h.Title, type: h.Type }));
+});
 
 const createDefaultSections = () => {
   const rows = DEFAULT_ROWS_PER_PAGE;
@@ -661,7 +668,7 @@ const hideSection = (sectionKey: PrintSectionKey) => {
 const syncColumnTypes = () => {
   for (const col of config.detailColumns) {
     if (!col.type) {
-      const h = props.backendData?.TbDetailHeaders?.find(x => x.Key === col.key);
+      const h = normalizeBackendData(props.backendData).TbDetailHeaders.find(x => x.Key === col.key);
       if (h?.Type) col.type = h.Type;
     }
   }
@@ -937,7 +944,7 @@ const loadConfig = async () => {
 const previewPrint = async () => {
   if (!props.backendData) { notify('error', '无数据'); return; }
   try {
-    const html = await renderFromConfigAsync(config as PrintTemplateConfig, props.backendData);
+    const html = await renderFromConfigAsync(config as PrintTemplateConfig, normalizeBackendData(props.backendData));
     const pw = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
     if (!pw) { notify('error', '打印窗口被拦截'); return; }
     pw.document.write(html);
@@ -1173,4 +1180,105 @@ onUnmounted(() => {
   color: #fff;
 }
 .vbp-btn-primary:hover { background: #1d4ed8; }
+
+</style>
+
+<style>
+/* --- self-contained utility classes (no UnoCSS/Tailwind needed) --- */
+.print-designer .flex { display: flex; }
+.print-designer .flex-col { flex-direction: column; }
+.print-designer .flex-row { flex-direction: row; }
+.print-designer .flex-1 { flex: 1 1 0%; }
+.print-designer .flex-wrap { flex-wrap: wrap; }
+.print-designer .grid { display: grid; }
+.print-designer .items-center { align-items: center; }
+.print-designer .items-start { align-items: flex-start; }
+.print-designer .justify-center { justify-content: center; }
+.print-designer .text-center { text-align: center; }
+.print-designer .fixed { position: fixed; }
+.print-designer .absolute { position: absolute; }
+.print-designer .inset-0 { inset: 0; }
+.print-designer .left-0 { left: 0; }
+.print-designer .right-0 { right: 0; }
+.print-designer .z-50 { z-index: 50; }
+.print-designer .overflow-auto { overflow: auto; }
+.print-designer .overflow-hidden { overflow: hidden; }
+.print-designer .h-87vh { height: 87vh; }
+.print-designer .w-full { width: 100%; }
+.print-designer .w-10 { width: 2.5rem; }
+.print-designer .w-12 { width: 3rem; }
+.print-designer .w-14 { width: 3.5rem; }
+.print-designer .w-16 { width: 4rem; }
+.print-designer .w-64 { width: 16rem; }
+.print-designer .shrink-0 { flex-shrink: 0; }
+.print-designer .col-span-1 { grid-column: span 1 / span 1; }
+.print-designer .gap-0\.5 { gap: 0.125rem; }
+.print-designer .gap-1 { gap: 0.25rem; }
+.print-designer .gap-2 { gap: 0.5rem; }
+.print-designer .gap-x-2 { column-gap: 0.5rem; }
+.print-designer .gap-y-1 { row-gap: 0.25rem; }
+.print-designer .p-1 { padding: 0.25rem; }
+.print-designer .p-1\.5 { padding: 0.375rem; }
+.print-designer .p-2 { padding: 0.5rem; }
+.print-designer .p-4 { padding: 1rem; }
+.print-designer .px-0\.5 { padding-left: 0.125rem; padding-right: 0.125rem; }
+.print-designer .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+.print-designer .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+.print-designer .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+.print-designer .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+.print-designer .mb-0\.5 { margin-bottom: 0.125rem; }
+.print-designer .mb-1 { margin-bottom: 0.25rem; }
+.print-designer .mb-2 { margin-bottom: 0.5rem; }
+.print-designer .mt-0\.5 { margin-top: 0.125rem; }
+.print-designer .mt-1 { margin-top: 0.25rem; }
+.print-designer .mt-2 { margin-top: 0.5rem; }
+.print-designer .mt-3 { margin-top: 0.75rem; }
+.print-designer .ml-1 { margin-left: 0.25rem; }
+.print-designer .mr-1 { margin-right: 0.25rem; }
+.print-designer .mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+.print-designer .rounded { border-radius: 0.25rem; }
+.print-designer .border { border: 1px solid #d1d5db; }
+.print-designer .border-r { border-right: 1px solid #d1d5db; }
+.print-designer .border-collapse { border-collapse: collapse; }
+.print-designer .border-transparent { border-color: transparent; }
+.print-designer .border-gray-300 { border-color: #d1d5db; }
+.print-designer .border-amber-200 { border-color: #fde68a; }
+.print-designer .bg-white { background: #fff; }
+.print-designer .bg-black { background: #000; }
+.print-designer .bg-gray-50 { background: #f9fafb; }
+.print-designer .bg-gray-100 { background: #f3f4f6; }
+.print-designer .bg-gray-200 { background: #e5e7eb; }
+.print-designer .bg-blue-50 { background: #eff6ff; }
+.print-designer .bg-green-50 { background: #f0fdf4; }
+.print-designer .bg-amber-50 { background: #fffbeb; }
+.print-designer .bg-opacity-20 { background: rgba(0,0,0,0.2); }
+.print-designer .shadow-sm { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.print-designer .shadow-lg { box-shadow: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05); }
+.print-designer .text-xs { font-size: 0.75rem; line-height: 1rem; }
+.print-designer .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.print-designer .font-medium { font-weight: 500; }
+.print-designer .font-bold { font-weight: 700; }
+.print-designer .font-normal { font-weight: 400; }
+.print-designer .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.print-designer .italic { font-style: italic; }
+.print-designer .text-gray-300 { color: #d1d5db; }
+.print-designer .text-gray-400 { color: #9ca3af; }
+.print-designer .text-gray-500 { color: #6b7280; }
+.print-designer .text-gray-600 { color: #4b5563; }
+.print-designer .text-gray-800 { color: #1f2937; }
+.print-designer .text-blue-600 { color: #2563eb; }
+.print-designer .text-red-500 { color: #ef4444; }
+.print-designer .text-red-600 { color: #dc2626; }
+.print-designer .text-amber-600 { color: #d97706; }
+.print-designer .text-amber-800 { color: #92400e; }
+.print-designer .text-amber-900 { color: #78350f; }
+.print-designer .cursor-grab { cursor: grab; }
+.print-designer .cursor-move { cursor: move; }
+.print-designer .select-none { user-select: none; }
+.print-designer .pointer-events-none { pointer-events: none; }
+.print-designer .opacity-50 { opacity: 0.5; }
+.print-designer .ring-2.ring-blue-500 { box-shadow: 0 0 0 2px #3b82f6; }
+.print-designer .ring-2 { box-shadow: 0 0 0 2px #3b82f6; }
+.print-designer .hover:border-blue-300:hover { border-color: #93c5fd; }
+.print-designer .hover:border-blue-400:hover { border-color: #60a5fa; }
 </style>

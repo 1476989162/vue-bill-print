@@ -1,6 +1,7 @@
 ﻿// src/render.ts — HTML template print engine
 // 固定 HTML 模板打印：加载模板配置 → 填入数据 → 新窗口打印
 import type { BackendData, FreeElementConfig, PrintTemplateConfig, TemplateStore } from './types';
+import { normalizeBackendData } from './types';
 import { formatDateValue } from './format';
 import { emitMessage, getStore } from './storage';
 import JsBarcode from 'jsbarcode';

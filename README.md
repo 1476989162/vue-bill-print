@@ -5,10 +5,12 @@
 [![npm downloads](https://img.shields.io/npm/dm/vue-bill-print)](https://www.npmjs.com/package/vue-bill-print)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[English](README.en.md) · 简体中文
+
 
 Vue 3 **单据打印设计器**骨架：拖拽设计模板、自定义纸张（含针式短纸）、按页类型分页、纯 HTML 打印（不依赖 hiprint）。
 
-> 当前为可运行的开源骨架（`0.1.0`）。核心渲染引擎已从生产项目抽出；UI 仍使用少量工具类（playground 用 UnoCSS）。欢迎试用与提 Issue。
+> 当前版本 `0.1.0`。核心渲染引擎已从生产项目抽出；设计器 CSS 已自包含，不依赖 UnoCSS/Tailwind。欢迎试用与提 Issue。
 
 
 ## Demo
@@ -124,11 +126,12 @@ vue-bill-print/
 
 ## Roadmap
 
-- [ ] Designer CSS 自包含（去掉对 UnoCSS 工具类的依赖）
-- [ ] npm 发布与 CI
-- [ ] 英文文档
-- [ ] 更多 demo 模板（采购订单 / 入库）
-- [ ] `header` / `details` 别名（兼容非 `Tb` 命名）
+- [x] 自包含 CSS（去掉 UnoCSS 依赖）
+- [x] CI 自动化（typecheck + build）
+- [x] 英文文档
+- [x] 更多 demo 模板（采购订单 / 入库）
+- [x] `header` / `details` 别名兼容
+- [ ] 首次 npm 发布
 
 ## License
 

@@ -1,14 +1,23 @@
 /** Bill / document payload used by the renderer & designer */
 export interface BackendData {
   Identify?: number;
-  /** Header field values, e.g. { 单据编号: 'SO-001', 客户: 'Acme' } */
-  Tb: Record<string, unknown>;
+  /** Header field values */
+  Tb?: Record<string, unknown>;
   /** Detail rows */
-  TbDetail: Record<string, unknown>[];
+  TbDetail?: Record<string, unknown>[];
   /** Header field metadata (for designer palette) */
-  TbHeaders: FieldMeta[];
+  TbHeaders?: FieldMeta[];
   /** Detail column metadata (for designer palette) */
-  TbDetailHeaders: FieldMeta[];
+  TbDetailHeaders?: FieldMeta[];
+
+  /** Alias for Tb */
+  header?: Record<string, unknown>;
+  /** Alias for TbDetail */
+  details?: Record<string, unknown>[];
+  /** Alias for TbHeaders */
+  headerMeta?: FieldMeta[];
+  /** Alias for TbDetailHeaders */
+  detailMeta?: FieldMeta[];
 }
 
 export interface FieldMeta {
@@ -20,6 +29,28 @@ export interface FieldMeta {
   Visible?: boolean;
   [key: string]: unknown;
 }
+
+
+/** Canonical shape after normalizeBackendData: all Tb* fields present. */
+export interface NormalizedBackendData {
+  Identify?: number;
+  Tb: Record<string, unknown>;
+  TbDetail: Record<string, unknown>[];
+  TbHeaders: FieldMeta[];
+  TbDetailHeaders: FieldMeta[];
+}
+
+/** Merge optional alias fields into the canonical Tb* shape. */
+export const normalizeBackendData = (data: BackendData | null | undefined): NormalizedBackendData => {
+  const d = data ?? ({} as BackendData);
+  return {
+    Identify: d.Identify,
+    Tb: d.Tb ?? d.header ?? {},
+    TbDetail: d.TbDetail ?? d.details ?? [],
+    TbHeaders: d.TbHeaders ?? d.headerMeta ?? [],
+    TbDetailHeaders: d.TbDetailHeaders ?? d.detailMeta ?? [],
+  };
+};
 
 export interface PaperConfig {
   width: number;
