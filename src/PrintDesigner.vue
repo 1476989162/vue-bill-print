@@ -511,6 +511,42 @@ const createDefaultSections = () => {
   };
 };
 
+// 按模板返回一份「空白基础 config」（整份重置用，字段数组留空由 seedFromBackend / 内置默认填充）
+const createBaseConfig = (formType: string): PrintTemplateConfig => {
+  const common = {
+    headerFields: [] as any[], detailColumns: [] as any[], freeElements: [] as any[], summaryRows: [] as any[],
+    tableLeft: 10,
+    sequenceColumnWidth: DEFAULT_SEQUENCE_COL_WIDTH,
+    detailHeaderHeight: DEFAULT_DETAIL_HEADER_HEIGHT,
+    detailRowHeight: DEFAULT_DETAIL_ROW_HEIGHT,
+    allowTableOverflow: true, headerNoWrap: true,
+    titleFontSize: 14, titleTop: 28, titleLeft: 0, titleWidth: 0,
+    titleMarginBottom: 1, rowsPerPage: DEFAULT_ROWS_PER_PAGE, repeatHeader: true, repeatColumnHeader: true,
+    footerText: '', showPageNumber: true, version: 3,
+  };
+  if (formType === '销售出库') {
+    return {
+      ...common,
+      paper: { width: 241, height: 93, orientation: 'portrait', marginTop: 0, marginRight: 0, marginBottom: 0, marginLeft: 0 },
+      sections: {
+        header: { key: 'header', title: t('default.sectionHeader'), top: 20, height: 50, visible: true, autoFlow: true, printMode: 'first' },
+        detail: { key: 'detail', title: t('default.sectionDetail'), top: 70, height: 180, visible: true, autoFlow: true },
+        footer: { key: 'footer', title: t('default.sectionFooter'), top: 252.03, height: 20, visible: true, autoFlow: true, printMode: 'last' },
+      },
+      tableTop: 70,
+      title: '销售出库',
+    } as PrintTemplateConfig;
+  }
+  // 采购订单 / 采购入库 / 默认：A4 横向
+  return {
+    ...common,
+    paper: { width: 297, height: 210, orientation: 'landscape', marginTop: 8, marginRight: 6, marginBottom: 8, marginLeft: 6 },
+    sections: createDefaultSections(),
+    tableTop: 120,
+    title: formType || t('default.docTitle'),
+  } as PrintTemplateConfig;
+};
+
 // 配置
 const config = reactive<PrintTemplateConfig>({
   paper: { width: 148, height: 210, orientation: 'portrait', marginTop: 8, marginRight: 6, marginBottom: 8, marginLeft: 6 },
@@ -1040,7 +1076,10 @@ const onKeyDown = (e: KeyboardEvent) => {
 };
 
 // 优先载入内置默认模板（首次打开/重置示例时），无则回退到示例铺字段
+// 优先整份重置为基础 config（避免切换模板时沿用上一份的纸张/分区/页脚），再载入内置默认或示例铺字段
 const applyBuiltinOrDefault = () => {
+  Object.assign(config, createBaseConfig(props.formType || ''));
+  normalizeLoadedConfig();
   const builtin = getBuiltinDefault(props.formType || '');
   if (builtin) {
     Object.assign(config, JSON.parse(JSON.stringify(builtin)));
@@ -1053,7 +1092,18 @@ const applyBuiltinOrDefault = () => {
 // 从后端数据铺表头/明细字段（仅当无已保存模板或该模板字段为空时）
 const seedFromBackend = () => {
   config.title = props.formType || config.title;
-  headerFields.value.forEach((h, i) => config.headerFields.push({ key: h.key, title: h.title, left: 20, top: 30 + i * 16, fontSize: 9, width: 120, bold: false, align: 'left', showLabel: true, section: 'header' }));
+  const cols = headerFields.value.length > 4 ? 2 : 1;
+  const colGap = 280;   // pt
+  const rowGap = 18;    // pt
+  headerFields.value.forEach((h, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    config.headerFields.push({
+      key: h.key, title: h.title,
+      left: 20 + col * colGap, top: 30 + row * rowGap,
+      fontSize: 9, width: 120, bold: false, align: 'left', showLabel: true, section: 'header',
+    });
+  });
   detailFields.value.forEach(d => config.detailColumns.push({ key: d.key, title: d.title, width: 50, align: 'center', visible: true, type: d.type }));
 };
 
