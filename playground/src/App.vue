@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { PrintDesigner, printBill } from 'vue-bill-print';
 import { sampleOutbound, samplePurchase, sampleInbound } from './sampleData';

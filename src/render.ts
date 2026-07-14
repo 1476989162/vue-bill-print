@@ -2,6 +2,7 @@
 // 固定 HTML 模板打印：加载模板配置 → 填入数据 → 新窗口打印
 import type { BackendData, FreeElementConfig, PrintTemplateConfig, TemplateStore } from './types';
 import { normalizeBackendData } from './types';
+import { st } from './i18n';
 import { formatDateValue } from './format';
 import { emitMessage, getStore } from './storage';
 import JsBarcode from 'jsbarcode';
@@ -66,9 +67,9 @@ const ensurePrintConfig = (cfg: PrintTemplateConfig): PrintTemplateConfig => {
     const defaultRowPt = cfg.detailRowHeight || DEFAULT_DETAIL_ROW_HEIGHT;
     const detailH = (cfg.detailHeaderHeight || DEFAULT_DETAIL_HEADER_HEIGHT) + resolveRowsPerPage(cfg) * defaultRowPt;
     cfg.sections = {
-      header: { key: 'header', title: '上部分', top: 20, height: Math.max((cfg.tableTop || 120) - 20, 60), visible: true, autoFlow: true },
-      detail: { key: 'detail', title: '单据体', top: cfg.tableTop || 120, height: Math.max(detailH, 60), visible: true, autoFlow: true },
-      footer: { key: 'footer', title: '下部分', top: 450, height: 55, visible: true, autoFlow: true },
+      header: { key: 'header', title: st('default.sectionHeader'), top: 20, height: Math.max((cfg.tableTop || 120) - 20, 60), visible: true, autoFlow: true },
+      detail: { key: 'detail', title: st('default.sectionDetail'), top: cfg.tableTop || 120, height: Math.max(detailH, 60), visible: true, autoFlow: true },
+      footer: { key: 'footer', title: st('default.sectionFooter'), top: 450, height: 55, visible: true, autoFlow: true },
     };
   }
   if (cfg.tableTop != null && cfg.sections.detail.top == null) {
@@ -898,7 +899,7 @@ export const htmlPrint = async (
     fallbackHtml: opts?.fallbackHtml,
   });
   if (!template) {
-    emitMessage('error', '未找到打印模板: ' + formType, opts?.onMessage);
+    emitMessage('error', st('render.templateNotFound', formType), opts?.onMessage);
     return;
   }
 
@@ -908,7 +909,7 @@ export const htmlPrint = async (
     : renderTemplate(template, backendData);
   const printWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
   if (!printWindow) {
-    emitMessage('error', '打印窗口被浏览器拦截', opts?.onMessage);
+    emitMessage('error', st('render.printBlocked'), opts?.onMessage);
     return;
   }
 

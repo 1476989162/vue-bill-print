@@ -43,3 +43,7 @@ export {
 export { default as PrintDesigner } from './PrintDesigner.vue';
 
 import './style.css';
+
+// ---- i18n ----
+export { t, st, setLocale, getLocale } from './i18n';
+export type { SupportedLocale } from './i18n';

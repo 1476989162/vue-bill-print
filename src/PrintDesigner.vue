@@ -1,30 +1,30 @@
-<!-- src/components/PrintDesigner.vue -->
+﻿<!-- src/components/PrintDesigner.vue -->
 <template>
   <div class="print-designer flex flex-col h-87vh">
     <!-- 工具栏 -->
     <div class="toolbar flex items-center gap-1 bg-gray-100 p-2 rounded mb-1 flex-wrap text-xs">
-      <span class="font-medium">纸张：</span>
+      <span class="font-medium">{{ t("toolbar.paper") }}</span>
       <button type="button" v-for="(v, t) in paperPresets" :key="t" :class="['vbp-btn', curPaperType === t ? 'vbp-btn-primary' : '']" 
         @click="setPaper(t, v)">{{ t }}</button>
       <button type="button"  :class="['vbp-btn', curPaperType === 'custom' ? 'vbp-btn-primary' : '']"
-        @click="openCustomPaperPop">自定义</button>
+        @click="openCustomPaperPop">{{ t('toolbar.custom') }}</button>
       <!-- 自定义纸张弹窗 - 用普通 div 模拟，避免 el-popover 兼容问题 -->
       <div v-if="showPaperPop" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20"
         @click.self="showPaperPop = false">
         <div class="bg-white rounded shadow-lg p-4 w-64 text-sm" @click.stop>
-          <div class="font-medium mb-2">自定义纸张(mm)</div>
+          <div class="font-medium mb-2">{{ t("paperSetting.title") }}</div>
           <div class="flex gap-2 items-center mb-2">
-            <span>宽</span><input v-model.number="customW" type="number" class="w-16 border rounded px-1" />
-            <span>高</span><input v-model.number="customH" type="number" class="w-16 border rounded px-1" />
+            <span>{{ t("toolbar.width") }}</span><input v-model.number="customW" type="number" class="w-16 border rounded px-1" />
+            <span>{{ t("toolbar.height") }}</span><input v-model.number="customH" type="number" class="w-16 border rounded px-1" />
           </div>
-          <button type="button" class="vbp-btn vbp-btn-primary"   @click="applyCustomPaper">确定</button>
-          <button type="button" class="vbp-btn"  @click="showPaperPop = false">取消</button>
+          <button type="button" class="vbp-btn vbp-btn-primary"   @click="applyCustomPaper">{{ t('toolbar.confirm') }}</button>
+          <button type="button" class="vbp-btn"  @click="showPaperPop = false">{{ t('toolbar.cancel') }}</button>
         </div>
       </div>
-      <button type="button" class="vbp-btn"  @click="toggleOrientation">{{ isLandscape ? '纵向' : '横向' }}</button>
+      <button type="button" class="vbp-btn"  @click="toggleOrientation">{{ isLandscape ? t('toolbar.portrait') : t('toolbar.landscape') }}</button>
 
       <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
-      <span class="font-medium">边距：</span>
+      <span class="font-medium">{{ t("toolbar.margin") }}</span>
       <span>上</span><input v-model.number="config.paper.marginTop" type="number"
         class="w-10 border rounded px-0.5 text-xs" />
       <span>下</span><input v-model.number="config.paper.marginBottom" type="number"
@@ -35,22 +35,22 @@
         class="w-10 border rounded px-0.5 text-xs" />
 
       <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
-      <span class="font-medium">每页行数</span><input v-model.number="config.rowsPerPage"
-        type="number" class="w-12 border rounded px-0.5 text-xs" min="1" title="固定每页明细行数（原尺寸分页，不缩放）。装不下请调小行高或减少行数" />
-      <span class="text-gray-500 text-xs" :title="'单页含头尾约 '+suggestedRows+' 行；续页无表头约 '+continuationRows+' 行'">
+      <span class="font-medium">{{ t("toolbar.rowsPerPage") }}</span><input v-model.number="config.rowsPerPage"
+        type="number" class="w-12 border rounded px-0.5 text-xs" min="1" title="t('toolbar.rowsPerPageTitle')" />
+      <span class="text-gray-500 text-xs" :title="t('toolbar.singleHint', suggestedRows, continuationRows)">
         单页≤{{ suggestedRows }} / 续页≤{{ continuationRows }}
       </span>
-      <span v-if="config.rowsPerPage > continuationRows" class="text-amber-600 text-xs">超出纸张，打印会裁切</span>
+      <span v-if="config.rowsPerPage > continuationRows" class="text-amber-600 text-xs">{{ t("toolbar.overflowWarn") }}</span>
       <span v-if="tableOverflowPt > 0" class="text-red-600">超宽 {{ (tableOverflowPt / PT_PER_MM).toFixed(1) }}mm</span>
-      <label class="flex items-center gap-0.5 ml-1"><input type="checkbox" v-model="repeatHeaderComputed" /> 表头</label>
-      <label class="flex items-center gap-0.5"><input type="checkbox" v-model="config.repeatColumnHeader" /> 列名</label>
-      <label class="flex items-center gap-0.5 ml-1" title="显示标题底边至表格顶边的间距辅助线"><input type="checkbox"
-          v-model="showGapGuide" /> 间距线</label>
+      <label class="flex items-center gap-0.5 ml-1"><input type="checkbox" v-model="repeatHeaderComputed" />{{ t('toolbar.repeatHeader') }}</label>
+      <label class="flex items-center gap-0.5"><input type="checkbox" v-model="config.repeatColumnHeader" />{{ t('toolbar.repeatColHeader') }}</label>
+      <label class="flex items-center gap-0.5 ml-1" title="t('toolbar.gapGuideTitle')"><input type="checkbox"
+          v-model="showGapGuide" /> {{ t("toolbar.gapGuide") }}</label>
 
       <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
-      <button type="button" class="vbp-btn vbp-btn-primary"   @click="saveConfig">保存</button>
-      <button type="button" class="vbp-btn"  @click="loadConfig">加载</button>
-      <button type="button" class="vbp-btn"  @click="previewPrint">预览</button>
+      <button type="button" class="vbp-btn vbp-btn-primary"   @click="saveConfig">{{ t('toolbar.save') }}</button>
+      <button type="button" class="vbp-btn"  @click="loadConfig">{{ t('toolbar.load') }}</button>
+      <button type="button" class="vbp-btn"  @click="previewPrint">{{ t('toolbar.preview') }}</button>
     </div>
 
     <!-- 主体三栏 -->
@@ -58,23 +58,23 @@
       <!-- 左栏 -->
       <div class="left flex flex-col bg-white border rounded shadow-sm p-2 mr-1 overflow-auto"
         style="min-width:140px;width:18%">
-        <div class="text-xs font-medium mb-1">表头字段（拖入画布）</div>
+        <div class="text-xs font-medium mb-1">{{ t("panel.headerFields") }}</div>
         <div v-for="f in headerFields" :key="f.key"
           class="field-item px-2 py-0.5 mb-0.5 text-xs bg-blue-50 border rounded cursor-grab select-none"
           draggable="true" @dragstart="onDragStart($event, 'header', f)">{{ f.title }}</div>
-        <div class="text-xs font-medium mt-2 mb-1">明细列</div>
+        <div class="text-xs font-medium mt-2 mb-1">{{ t("panel.detailColumns") }}</div>
         <div v-for="c in detailFields" :key="c.key"
           class="field-item px-2 py-0.5 mb-0.5 text-xs bg-green-50 border rounded cursor-grab select-none"
           draggable="true" @dragstart="onDragStart($event, 'detail', c)">{{ c.title }}</div>
-        <div class="text-xs font-medium mt-2 mb-1">辅助元素</div>
+        <div class="text-xs font-medium mt-2 mb-1">{{ t("panel.freeElements") }}</div>
         <div class="field-item px-2 py-0.5 mb-0.5 text-xs bg-gray-100 border rounded cursor-grab select-none"
-          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'hline' })">横线</div>
+          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'hline' })">{{ t('panel.hLine') }}</div>
         <div class="field-item px-2 py-0.5 mb-0.5 text-xs bg-gray-100 border rounded cursor-grab select-none"
-          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'text', content: '文本' })">文本</div>
+          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'text', content: '文本' })">{{ t('panel.text') }}</div>
         <div class="field-item px-2 py-0.5 mb-0.5 text-xs bg-gray-100 border rounded cursor-grab select-none"
-          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'barcode', content: '123456' })">条码</div>
+          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'barcode', content: '123456' })">{{ t('panel.barcode') }}</div>
         <div class="field-item px-2 py-0.5 mb-0.5 text-xs bg-gray-100 border rounded cursor-grab select-none"
-          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'qrcode', content: '123456' })">二维码</div>
+          draggable="true" @dragstart="onDragStart($event, 'free', { type: 'qrcode', content: '123456' })">{{ t('panel.qrcode') }}</div>
       </div>
 
       <!-- 中栏：画布 -->
@@ -102,9 +102,9 @@
               @dragstart="onElDragStart($event, 'section', section.key)" @dragend="onElDragEnd"
               @click.stop="selectSection(section.key)">
               <span class="section-band-label">{{ section.title }}<em v-if="section.key === 'header'"
-                  class="section-tag">{{ section.printMode === 'first' ? '仅首页' : '每页' }}</em><em
+                  class="section-tag">{{ section.printMode === 'first' ? t('canvas.firstPageOnly') : t('canvas.everyPage') }}</em><em
                   v-else-if="section.key === 'footer'"
-                  class="section-tag">{{ section.printMode === 'every' ? '每页' : '仅末页' }}</em></span>
+                  class="section-tag">{{ section.printMode === 'every' ? t('canvas.everyPage') : t('canvas.lastPageOnly') }}</em></span>
             </div>
             <!-- 标题（可拖拽，与打印坐标一致） -->
             <div v-if="config.sections?.header.visible !== false"
@@ -160,7 +160,7 @@
                   </thead>
                   <tbody>
                     <tr :style="{ height: detailRowHeight + 'pt' }">
-                      <td colspan="10" class="border text-center text-gray-300 py-1">明细数据</td>
+                      <td colspan="10" class="border text-center text-gray-300 py-1">{{ t("canvas.detailData") }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -180,7 +180,7 @@
               <div v-else>{{ e.content }}</div>
             </div>
 
-            <!-- 页脚预览：页码贴内容区底（与打印一致） -->
+            <!-- {{ t("footer.title") }}预览：页码贴内容区底（与打印一致） -->
             <div v-if="config.showPageNumber"
               class="absolute text-xs text-gray-400 pointer-events-none text-center"
               :style="{ left: '0', right: '0', top: pageNumPreviewTopPt + 'pt', zIndex: 5 }">
@@ -262,15 +262,15 @@
 
         <!-- 表格位置 -->
         <template v-if="selType === 'table'">
-          <div class="text-xs font-medium mb-1">表格位置 (pt)</div>
+          <div class="text-xs font-medium mb-1">{{ t("table.position") }}</div>
           <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-xs mt-1">
             <span>左</span><input v-model.number="config.tableLeft" type="number" class="border rounded px-1" />
             <span>上</span><input v-model.number="config.tableTop" type="number" class="border rounded px-1" />
-            <span>序号列</span><input v-model.number="config.sequenceColumnWidth" type="number" class="border rounded px-1"
+            <span>{{ t("table.seqCol") }}</span><input v-model.number="config.sequenceColumnWidth" type="number" class="border rounded px-1"
               min="10" />
-            <span>列名高</span><input v-model.number="config.detailHeaderHeight" type="number" class="border rounded px-1"
+            <span>{{ t("table.colHeaderH") }}</span><input v-model.number="config.detailHeaderHeight" type="number" class="border rounded px-1"
               min="8" />
-            <span>行高</span><input v-model.number="config.detailRowHeight" type="number" class="border rounded px-1"
+            <span>{{ t("table.rowH") }}</span><input v-model.number="config.detailRowHeight" type="number" class="border rounded px-1"
               min="8" />
           </div>
           <div class="text-xs text-gray-500 mt-1">表宽 {{ (detailTableWidthPt / PT_PER_MM).toFixed(1) }}mm；可打印 {{
@@ -313,7 +313,7 @@
               <option value="right">右</option>
             </select>
           </div>
-          <button type="button" class="vbp-btn mt-2" @click="removeItem('header', selIdx)">删除</button>
+          <button type="button" class="vbp-btn mt-2" @click="removeItem('header', selIdx)">{{ t('field.delete') }}</button>
         </template>
 
         <!-- 明细列 -->
@@ -343,7 +343,7 @@
             <button type="button" class="vbp-btn"  :disabled="selIdx >= config.detailColumns.length - 1" @click="moveDetailCol(1)">↓
               右移</button>
           </div>
-          <button type="button" class="vbp-btn mt-2" @click="removeItem('detail', selIdx)">删除</button>
+          <button type="button" class="vbp-btn mt-2" @click="removeItem('detail', selIdx)">{{ t('field.delete') }}</button>
         </template>
 
         <!-- 自由元素 -->
@@ -367,8 +367,8 @@
               <option value="header">上部分（每页）</option>
               <option value="footer">下部分（仅末页）</option>
             </select>
-            <span>宽</span><input v-model.number="selFree.width" type="number" class="border rounded px-1" min="10" />
-            <span>高</span><input v-model.number="selFree.height" type="number" class="border rounded px-1" min="1" />
+            <span>{{ t("toolbar.width") }}</span><input v-model.number="selFree.width" type="number" class="border rounded px-1" min="10" />
+            <span>{{ t("toolbar.height") }}</span><input v-model.number="selFree.height" type="number" class="border rounded px-1" min="1" />
             <span>左</span><input v-model.number="selFree.left" type="number" class="border rounded px-1" />
             <span>上</span><input v-model.number="selFree.top" type="number" class="border rounded px-1" />
             <template v-if="selFree.type !== 'barcode' && selFree.type !== 'qrcode'">
@@ -378,11 +378,11 @@
           </div>
           <div v-if="selFree.type === 'barcode' || selFree.type === 'qrcode'" class="text-xs text-gray-400 mt-1">内容支持
             {字段名} 占位符，打印时替换为表头字段值</div>
-          <button type="button" class="vbp-btn mt-2" @click="removeItem('free', selIdx)">删除</button>
+          <button type="button" class="vbp-btn mt-2" @click="removeItem('free', selIdx)">{{ t('field.delete') }}</button>
         </template>
 
-        <!-- 模板分区（始终显示，隐藏的分区也可在此恢复） -->
-        <div class="text-xs font-medium mt-3 mb-1">模板分区</div>
+        <!-- {{ t("tpl.panels") }}（始终显示，隐藏的分区也可在此恢复） -->
+        <div class="text-xs font-medium mt-3 mb-1">{{ t("tpl.panels") }}</div>
         <div v-for="section in sectionList" :key="section.key"
           class="text-xs flex items-center gap-1 mb-1 p-1 bg-gray-50 rounded border"
           :class="{ 'opacity-50': !section.visible }">
@@ -391,21 +391,21 @@
             <span>{{ section.title }}</span>
             <span v-if="!section.visible" class="text-gray-400">(已隐藏)</span>
           </label>
-          <button class="text-blue-600" @click="selectSection(section.key)">编辑</button>
+          <button class="text-blue-600" @click="selectSection(section.key)">{{ t('tpl.edit') }}</button>
         </div>
 
         <!-- 汇总 -->
-        <div class="text-xs font-medium mt-3 mb-1">汇总行</div>
-        <div v-if="!config.summaryRows.length" class="text-xs text-gray-400">无</div>
+        <div class="text-xs font-medium mt-3 mb-1">{{ t("summary.title") }}</div>
+        <div v-if="!config.summaryRows.length" class="text-xs text-gray-400">{{ t('summary.none') }}</div>
         <div v-for="(s, i) in config.summaryRows" :key="i"
           class="text-xs flex items-center gap-1 mb-2 p-1 bg-blue-50 rounded border">
           <select v-model="s.method" class="border rounded px-0.5 text-xs w-14">
-            <option value="sum">合计</option>
-            <option value="count">计数</option>
-            <option value="avg">平均</option>
+            <option value="sum">{{ t('summary.sum') }}</option>
+            <option value="count">{{ t('summary.count') }}</option>
+            <option value="avg">{{ t('summary.avg') }}</option>
           </select>
           <select v-model="s.field" class="border rounded px-0.5 text-xs flex-1">
-            <option value="">-- 选择列 --</option>
+            <option value="">{{ t("summary.selectColumn") }}</option>
             <option v-for="c in config.detailColumns" :key="c.key" :value="c.key">{{ c.title }}</option>
           </select>
           <span v-if="s.field" class="text-gray-600 italic">({{config.detailColumns.find(c => c.key === s.field)?.title
@@ -413,19 +413,20 @@
           <button class="text-red-500" @click="config.summaryRows.splice(i, 1)">✕</button>
         </div>
         <button type="button" class="vbp-btn mt-1"
-          @click="config.summaryRows.push({ label: '合计', field: config.detailColumns[0]?.key || '', method: 'sum', position: 'footer' })">+
+          @click="config.summaryRows.push({ label: t('summary.sum'), field: config.detailColumns[0]?.key || '', method: 'sum', position: 'footer' })">+
           添加</button>
 
-        <div class="text-xs font-medium mt-3 mb-1">页脚</div>
+        <div class="text-xs font-medium mt-3 mb-1">{{ t("footer.title") }}</div>
         <label class="text-xs flex items-center gap-1"><input type="checkbox" v-model="config.showPageNumber" />
           显示页码</label>
-        <input v-model="config.footerText" class="border rounded px-1 w-full mt-1 text-xs" placeholder="自定义页脚文本" />
+        <input v-model="config.footerText" class="border rounded px-1 w-full mt-1 text-xs" :placeholder="t('footer.textPlaceholder')" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { t } from "./i18n";
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import type { BackendData, PrintSectionConfig, PrintSectionKey, PrintTemplateConfig, TemplateStore, MessageLevel } from './types';
 import { normalizeBackendData } from './types';
@@ -479,9 +480,9 @@ const createDefaultSections = () => {
   const rowPt = DEFAULT_DETAIL_ROW_HEIGHT;
   const detailH = DEFAULT_DETAIL_HEADER_HEIGHT + rows * rowPt;
   return {
-    header: { key: 'header', title: '上部分', top: 20, height: 95, visible: true, autoFlow: true, printMode: 'every' } as PrintSectionConfig,
-    detail: { key: 'detail', title: '单据体', top: 120, height: Math.max(detailH, 60), visible: true, autoFlow: true } as PrintSectionConfig,
-    footer: { key: 'footer', title: '下部分', top: 450, height: 55, visible: true, autoFlow: true, printMode: 'last' } as PrintSectionConfig,
+    header: { key: 'header', title: t('default.sectionHeader'), top: 20, height: 95, visible: true, autoFlow: true, printMode: 'every' } as PrintSectionConfig,
+    detail: { key: 'detail', title: t('default.sectionDetail'), top: 120, height: Math.max(detailH, 60), visible: true, autoFlow: true } as PrintSectionConfig,
+    footer: { key: 'footer', title: t('default.sectionFooter'), top: 450, height: 55, visible: true, autoFlow: true, printMode: 'last' } as PrintSectionConfig,
   };
 };
 
@@ -496,7 +497,7 @@ const config = reactive<PrintTemplateConfig>({
   detailRowHeight: DEFAULT_DETAIL_ROW_HEIGHT,
   allowTableOverflow: true,
   headerNoWrap: true,
-  title: '采购申请单', titleFontSize: 14, titleTop: 28, titleLeft: 0, titleWidth: 0,
+  title: t('default.docTitle'), titleFontSize: 14, titleTop: 28, titleLeft: 0, titleWidth: 0,
   titleMarginBottom: 1, rowsPerPage: DEFAULT_ROWS_PER_PAGE, repeatHeader: true, repeatColumnHeader: true,
   footerText: '', showPageNumber: true, version: 3,
 });
@@ -606,7 +607,7 @@ const printableWidthPt = computed(() =>
   Math.max(0, (config.paper.width - config.paper.marginLeft - config.paper.marginRight) * PT_PER_MM - (config.tableLeft || 0))
 );
 const tableOverflowPt = computed(() => Math.max(0, detailTableWidthPt.value - printableWidthPt.value));
-/** 当前纸张在设计尺寸下大约能排几行（不缩放）；超出则提示调行高/行数 */
+/** 当前纸张在设计尺寸下大约能排几行（不缩放）；超出则提示调{{ t("table.rowH") }}/行数 */
 const suggestedRows = computed(() => computeMaxFittingRows(config, { includeSummary: true, includeFooter: true }));
 const continuationRows = computed(() => computeContinuationFittingRows(config));
 
@@ -927,22 +928,22 @@ const saveConfig = async () => {
       notify('warning', `每页上限 ${config.rowsPerPage} 超出续页容量（≤${continuationRows.value}）。单页含头尾约 ${suggestedRows.value} 行。打印按页类型自动分页，不会缩放。`);
     }
     await storeOf().save(props.formType, JSON.stringify(config));
-    notify('success', '模板保存成功');
-  } catch (err) { notify('error', '保存失败: ' + err); }
+    notify('success', t('notify.saveSuccess'));
+  } catch (err) { notify('error', t('notify.saveFailed', String(err))); }
 };
 
 const loadConfig = async () => {
   try {
     const templateJson = await storeOf().load(props.formType);
-    if (!templateJson) { notify('warning', '未找到模板'); return; }
+    if (!templateJson) { notify('warning', t('notify.templateNotFound')); return; }
     Object.assign(config, JSON.parse(templateJson));
     normalizeLoadedConfig();
-    notify('success', '模板加载成功');
-  } catch (err) { notify('error', '加载失败: ' + err); }
+    notify('success', t('notify.loadSuccess'));
+  } catch (err) { notify('error', t('notify.loadFailed', String(err))); }
 };
 
 const previewPrint = async () => {
-  if (!props.backendData) { notify('error', '无数据'); return; }
+  if (!props.backendData) { notify('error', t('notify.noData')); return; }
   try {
     const html = await renderFromConfigAsync(config as PrintTemplateConfig, normalizeBackendData(props.backendData));
     const pw = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
