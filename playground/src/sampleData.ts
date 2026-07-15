@@ -129,3 +129,100 @@ export const sampleInbound: BackendData = {
     { Key: '金额', Title: '金额', Type: 'Decimal', Visible: true },
   ],
 };
+
+/**
+ * Demo 物流/仓储标签（含二维码 + 条码）
+ *
+ * 标签类单据的特点：纸张很小、明细行数少、重点是二维码/条码 + 少量关键字段。
+ * 二维码/条码内容在设计器里通过「自由元素」放置，内容用 {键} 占位符引用 Tb 表头值，
+ * 例如二维码内容填 {SN} 就会渲染成该单据的序列号二维码。
+ *
+ * 建议纸张：60mm × 40mm 不干胶标签（下方 labelTemplate 已配好）。
+ */
+export const sampleLabel: BackendData = {
+  Identify: 4001,
+  Tb: {
+    品名: '不锈钢螺丝 M6',
+    规格: 'M6×20',
+    SN: 'SN-20260716-000123',       // 二维码内容
+    批次: 'LOT-260716',
+    条码: '6901234567892',           // 条码内容（EAN-13）
+    数量: 200,
+    单位: '盒',
+    仓位: 'A-03-12',
+    生产日期: '2026-07-16',
+  },
+  TbDetail: [
+    { 序号: 1, 项目: '品名', 内容: '不锈钢螺丝 M6' },
+    { 序号: 2, 项目: '规格', 内容: 'M6×20' },
+    { 序号: 3, 项目: '批次', 内容: 'LOT-260716' },
+  ],
+  TbHeaders: [
+    { Key: '品名', Title: '品名', Type: 'String', Visible: true },
+    { Key: '规格', Title: '规格', Type: 'String', Visible: true },
+    { Key: 'SN', Title: 'SN序列号', Type: 'String', Visible: true },
+    { Key: '批次', Title: '批次', Type: 'String', Visible: true },
+    { Key: '条码', Title: '条码', Type: 'String', Visible: true },
+    { Key: '数量', Title: '数量', Type: 'Number', Visible: true },
+    { Key: '单位', Title: '单位', Type: 'String', Visible: true },
+    { Key: '仓位', Title: '仓位', Type: 'String', Visible: true },
+    { Key: '生产日期', Title: '生产日期', Type: 'Date', Visible: true },
+  ],
+  TbDetailHeaders: [
+    { Key: '序号', Title: '#', Type: 'Number', Visible: true },
+    { Key: '项目', Title: '项目', Type: 'String', Visible: true },
+    { Key: '内容', Title: '内容', Type: 'String', Visible: true },
+  ],
+};
+
+/**
+ * 预置的标签模板（PrintTemplateConfig）——可直接存入 TemplateStore 使用。
+ * 演示了 qrcode / barcode / 文本 三种自由元素，内容均用 {键} 占位符绑定 Tb。
+ * 纸张 60mm × 40mm 不干胶标签，四周零边距。
+ */
+export const labelTemplate = {
+  paper: { width: 60, height: 40, orientation: 'portrait', marginTop: 0, marginRight: 0, marginBottom: 0, marginLeft: 0 },
+  sections: {
+    header: { key: 'header', title: '表头', top: 0, height: 113, visible: true, autoFlow: false, printMode: 'every' },
+    detail: { key: 'detail', title: '明细', top: 113, height: 0, visible: false, autoFlow: true },
+    footer: { key: 'footer', title: '表尾', top: 113, height: 0, visible: false, autoFlow: true, printMode: 'last' },
+  },
+  headerFields: [],
+  detailColumns: [],
+  // 自由元素坐标单位为 pt（1mm ≈ 2.835pt）
+  freeElements: [
+    // 二维码：内容 = SN 序列号
+    { type: 'qrcode', left: 4, top: 6, width: 62, height: 62, content: '{SN}', section: 'header' },
+    // 品名（大字）
+    { type: 'text', left: 72, top: 6, width: 96, height: 14, content: '{品名}', fontSize: 11, section: 'header' },
+    // 规格 + 批次
+    { type: 'text', left: 72, top: 24, width: 96, height: 12, content: '规格 {规格}', fontSize: 8, section: 'header' },
+    { type: 'text', left: 72, top: 36, width: 96, height: 12, content: '批次 {批次}  仓位 {仓位}', fontSize: 8, section: 'header' },
+    // 分隔线
+    { type: 'hline', left: 4, top: 74, width: 162, height: 1, section: 'header' },
+    // 条码：EAN-13，内容 = 条码字段
+    { type: 'barcode', left: 4, top: 80, width: 120, height: 30, content: '{条码}', barcodeFormat: 'EAN13', section: 'header' },
+    // 数量
+    { type: 'text', left: 128, top: 88, width: 38, height: 16, content: '{数量}{单位}', fontSize: 10, section: 'header' },
+  ],
+  summaryRows: [],
+  tableLeft: 10,
+  tableTop: 113,
+  sequenceColumnWidth: 24,
+  detailHeaderHeight: 18,
+  detailRowHeight: 18,
+  allowTableOverflow: true,
+  headerNoWrap: true,
+  title: '',
+  titleFontSize: 12,
+  titleTop: 0,
+  titleLeft: 0,
+  titleWidth: 0,
+  titleMarginBottom: 0,
+  rowsPerPage: 3,
+  repeatHeader: false,
+  repeatColumnHeader: false,
+  footerText: '',
+  showPageNumber: false,
+  version: 3,
+};

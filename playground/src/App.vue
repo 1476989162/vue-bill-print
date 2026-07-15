@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { PrintDesigner, printBill, getLocale, setLocale } from 'vue-bill-print';
-import { sampleOutbound, samplePurchase, sampleInbound } from './sampleData';
+import { sampleOutbound, samplePurchase, sampleInbound, sampleLabel } from './sampleData';
 
 const demoI18n: Record<string, Record<string, string>> = {
   'zh-CN': {
@@ -20,6 +20,7 @@ const demoI18n: Record<string, Record<string, string>> = {
     'demo.tpl.outbound': '销售出库',
     'demo.tpl.purchase': '采购订单',
     'demo.tpl.inbound': '采购入库',
+    'demo.tpl.label': '物流标签(二维码)',
     'demo.editData': '查看/编辑数据',
     'demo.dataEditor': '示例数据 (Tb / TbDetail …)',
     'demo.dataEditorHint': '可直接修改 JSON；点击“应用”后设计器实时重排。支持 Tb/TbDetail 或 header/details 别名。',
@@ -42,6 +43,7 @@ const demoI18n: Record<string, Record<string, string>> = {
     'demo.tpl.outbound': 'Sales Outbound',
     'demo.tpl.purchase': 'Purchase Order',
     'demo.tpl.inbound': 'Stock In',
+    'demo.tpl.label': 'Label (QR/Barcode)',
     'demo.editData': 'View / Edit Data',
     'demo.dataEditor': 'Sample Data (Tb / TbDetail …)',
     'demo.dataEditorHint': 'Edit the JSON directly; click Apply to re-layout the designer live. Supports Tb/TbDetail or header/details aliases.',
@@ -58,6 +60,7 @@ const templates = [
     { key: 'outbound', labelKey: 'demo.tpl.outbound', formType: '销售出库', data: sampleOutbound },
     { key: 'purchase', labelKey: 'demo.tpl.purchase', formType: '采购订单', data: samplePurchase },
     { key: 'inbound', labelKey: 'demo.tpl.inbound', formType: '采购入库', data: sampleInbound },
+    { key: 'label', labelKey: 'demo.tpl.label', formType: '物流标签', data: sampleLabel },
   ] as const;
   const curTpl = ref<typeof templates[number]['key']>('outbound');
   const formType = computed(() => templates.find(x => x.key === curTpl.value)!.formType);

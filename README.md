@@ -12,7 +12,7 @@
 
 Vue 3 **单据打印设计器**骨架：拖拽设计模板、自定义纸张（含针式短纸）、按页类型分页、纯 HTML 打印（不依赖 hiprint）。
 
-> 当前版本 `0.1.1`。核心渲染引擎已从生产项目抽出；设计器 CSS 已自包含，不依赖 UnoCSS/Tailwind。欢迎试用与提 Issue。
+> 当前版本 `0.1.2`。核心渲染引擎已从生产项目抽出；设计器 CSS 已自包含，不依赖 UnoCSS/Tailwind。欢迎试用与提 Issue。
 
 
 ## 演示
@@ -100,6 +100,27 @@ const apiStore: TemplateStore = {
 configure({ store: apiStore })
 ```
 
+### SQLite 完整示例
+
+`examples/sqlite-backend/` 提供了一个开箱即用的 **SQLite** 后端（Express + better-sqlite3），演示 `load / save / remove` 三个接口，以及如何从数据库表组装 `BackendData`：
+
+```bash
+cd examples/sqlite-backend
+npm install
+npm start        # http://localhost:3001
+```
+
+前端只需：
+
+```ts
+import { configure } from 'vue-bill-print'
+import { createSqliteApiStore } from './examples/sqlite-backend/apiStore'
+
+configure({ store: createSqliteApiStore('http://localhost:3001') })
+```
+
+详见 [examples/sqlite-backend/README.md](examples/sqlite-backend/README.md)。换 MySQL / PostgreSQL 只需替换 3 条 SQL。
+
 ## 国际化
 
 设计器界面支持中文和英文，可在运行时切换：
@@ -135,6 +156,12 @@ interface BackendData {
 
 兼容国内多数 ERP 单据的数据格式（保留 `Tb` / `TbDetail` 命名，便于迁移）。
 
+各字段（尤其 `TbHeaders` / `TbDetailHeaders` 里 `Key` / `Title` / `Type` / `Visible` / `IsPrint` / `PrintWidth`）的含义、取值与渲染行为，见 **[docs/data-structure.md](docs/data-structure.md)**。
+
+### 标签二维码 / 条码
+
+想打印带二维码、条码的小标签？演示页顶部切到「物流标签(二维码)」模板即可体验，做法见 **[docs/label-qrcode.md](docs/label-qrcode.md)**，示例数据与模板见 `playground/src/sampleData.ts` 的 `sampleLabel` / `labelTemplate`。
+
 ## 项目结构
 
 ```text
@@ -148,7 +175,12 @@ vue-bill-print/
 │   ├── format.ts
 │   ├── i18n/              # 国际化（zh-CN / en）
 │   └── PrintDesigner.vue  # 可视化设计器
-├── playground/            # Vite 演示
+├── examples/
+│   └── sqlite-backend/    # SQLite 后端对接示例（Express + better-sqlite3）
+├── docs/
+│   ├── data-structure.md  # 数据结构 / TbHeaders / TbDetailHeaders 详解
+│   └── label-qrcode.md    # 标签二维码 / 条码示例
+├── playground/            # Vite 演示（含物流标签模板）
 ├── README.md
 └── LICENSE                # MIT
 ```
@@ -162,6 +194,9 @@ vue-bill-print/
 - [x] `header` / `details` 别名兼容
 - [x] 国际化（zh-CN / en 语言包）
 - [x] 首次 npm 发布
+- [x] SQLite 后端对接示例
+- [x] 数据结构 / TbHeaders 详解文档
+- [x] 标签二维码 / 条码示例
 
 ## License
 
