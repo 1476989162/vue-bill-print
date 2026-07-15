@@ -61,6 +61,8 @@
           <option :value="1">100%</option>
           <option :value="1.5">150%</option>
           <option :value="2">200%</option>
+          <option :value="2.5">250%</option>
+          <option :value="3">300%</option>
         </select>
       </label>
     </div>
