@@ -17,6 +17,14 @@ const demoI18n: Record<string, Record<string, string>> = {
     'demo.step3': '点「预览」或上方「直接打印」',
     'demo.step4': 'Chrome 打印边距选「无」',
     'demo.lang': '语言',
+    'demo.tpl.outbound': '销售出库',
+    'demo.tpl.purchase': '采购订单',
+    'demo.tpl.inbound': '采购入库',
+    'demo.editData': '查看/编辑数据',
+    'demo.dataEditor': '示例数据 (Tb / TbDetail …)',
+    'demo.dataEditorHint': '可直接修改 JSON；点击“应用”后设计器实时重排。支持 Tb/TbDetail 或 header/details 别名。',
+    'demo.apply': '应用',
+    'demo.cancel': '取消',
   },
   'en': {
     'demo.openSource': 'Open source skeleton',
@@ -31,6 +39,14 @@ const demoI18n: Record<string, Record<string, string>> = {
     'demo.step3': 'Click "Preview" or "Print directly" above',
     'demo.step4': 'In Chrome print dialog, set margins to "None"',
     'demo.lang': 'Language',
+    'demo.tpl.outbound': 'Sales Outbound',
+    'demo.tpl.purchase': 'Purchase Order',
+    'demo.tpl.inbound': 'Stock In',
+    'demo.editData': 'View / Edit Data',
+    'demo.dataEditor': 'Sample Data (Tb / TbDetail …)',
+    'demo.dataEditorHint': 'Edit the JSON directly; click Apply to re-layout the designer live. Supports Tb/TbDetail or header/details aliases.',
+    'demo.apply': 'Apply',
+    'demo.cancel': 'Cancel',
   },
 };
 const demoT = (key: string) => (demoI18n[getLocale()] || demoI18n['zh-CN'])[key] || key;
@@ -39,15 +55,37 @@ const currentLocale = ref(getLocale());
 watch(currentLocale, (v) => setLocale(v as 'zh-CN' | 'en'));
 
 const templates = [
-    { key: 'outbound', label: '销售出库', data: sampleOutbound },
-    { key: 'purchase', label: '采购订单', data: samplePurchase },
-    { key: 'inbound', label: '采购入库', data: sampleInbound },
+    { key: 'outbound', labelKey: 'demo.tpl.outbound', formType: '销售出库', data: sampleOutbound },
+    { key: 'purchase', labelKey: 'demo.tpl.purchase', formType: '采购订单', data: samplePurchase },
+    { key: 'inbound', labelKey: 'demo.tpl.inbound', formType: '采购入库', data: sampleInbound },
   ] as const;
   const curTpl = ref<typeof templates[number]['key']>('outbound');
-  const formType = computed(() => templates.find(x => x.key === curTpl.value)!.label);
-  const curData = computed(() => templates.find(x => x.key === curTpl.value)!.data);
+  const formType = computed(() => templates.find(x => x.key === curTpl.value)!.formType);
+  const curData = computed(() => editableData.value ?? templates.find(x => x.key === curTpl.value)!.data);
 const showDesigner = ref(true);
 const printing = ref(false);
+
+// 示例数据可查看/编辑：切换模板时同步 editable 副本
+const editableData = ref(null);
+const dataModalOpen = ref(false);
+const dataText = ref('');
+const dataError = ref('');
+const syncEditable = () => { editableData.value = JSON.parse(JSON.stringify(curData.value)); };
+watch(curTpl, () => { syncEditable(); }, { immediate: true });
+const openDataEditor = () => {
+  dataText.value = JSON.stringify(editableData.value, null, 2);
+  dataError.value = '';
+  dataModalOpen.value = true;
+};
+const applyData = () => {
+  try {
+    const parsed = JSON.parse(dataText.value);
+    editableData.value = parsed;
+    dataModalOpen.value = false;
+  } catch (e) {
+    dataError.value = String(e);
+  }
+};
 
 const onPrint = async () => {
   printing.value = true;
@@ -71,11 +109,12 @@ const onPrint = async () => {
             {{ printing ? demoT('demo.printing') : demoT('demo.print') }}
           </button>
           <div class="template-switcher">
-          <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="curTpl = tpl.key">{{ tpl.label }}</button>
+          <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="curTpl = tpl.key">{{ demoT(tpl.labelKey) }}</button>
         </div>
           <button class="btn" @click="showDesigner = !showDesigner">
             {{ showDesigner ? demoT('demo.hideDesigner') : demoT('demo.showDesigner') }}
           </button>
+          <button class="btn" @click="openDataEditor">{{ demoT('demo.editData') }}</button>
         </div>
       </div>
       <aside class="tips">
@@ -97,10 +136,35 @@ const onPrint = async () => {
     <section v-if="showDesigner" class="designer-wrap">
       <PrintDesigner :form-type="formType" :backend-data="curData" />
     </section>
+
+    <div v-if="dataModalOpen" class="data-modal-mask" @click.self="dataModalOpen = false">
+      <div class="data-modal">
+        <div class="data-modal-head">
+          <strong>{{ demoT('demo.dataEditor') }}</strong>
+          <button class="btn xs" @click="dataModalOpen = false">×</button>
+        </div>
+        <p class="data-modal-hint">{{ demoT('demo.dataEditorHint') }}</p>
+        <textarea v-model="dataText" class="data-modal-text" spellcheck="false"></textarea>
+        <div v-if="dataError" class="data-modal-err">{{ dataError }}</div>
+        <div class="data-modal-foot">
+          <button class="btn xs" @click="dataModalOpen = false">{{ demoT('demo.cancel') }}</button>
+          <button class="btn xs primary" @click="applyData">{{ demoT('demo.apply') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.data-modal-mask { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.data-modal { width: min(720px, 92vw); max-height: 84vh; background: #fff; border-radius: 14px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden; }
+.data-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
+.data-modal-head .btn.xs { padding: 2px 10px; font-size: 16px; line-height: 1; }
+.data-modal-hint { margin: 0; padding: 8px 16px 0; font-size: 12px; color: #64748b; }
+.data-modal-text { flex: 1; margin: 10px 16px; min-height: 320px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.5; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc; }
+.data-modal-err { margin: 0 16px; color: #dc2626; font-size: 12px; white-space: pre-wrap; }
+.data-modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 16px 14px; }
+
 .page {
   min-height: 100vh;
   background:

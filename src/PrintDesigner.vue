@@ -53,6 +53,16 @@
       <button type="button" class="vbp-btn"  @click="resetToSample">{{ t('actions.resetSample') }}</button>
       <button type="button" class="vbp-btn"  @click="previewPrint">{{ t('toolbar.preview') }}</button>
       <button type="button" class="vbp-btn"  @click="openJson">{{ t('toolbar.viewJson') }}</button>
+      <label class="vbp-zoom">
+        <span>{{ t('toolbar.zoom') }}</span>
+        <select v-model.number="zoom" class="vbp-select">
+          <option :value="0.5">50%</option>
+          <option :value="0.75">75%</option>
+          <option :value="1">100%</option>
+          <option :value="1.5">150%</option>
+          <option :value="2">200%</option>
+        </select>
+      </label>
     </div>
 
     <!-- 主体三栏 -->
@@ -81,6 +91,7 @@
       <!-- 中栏：画布 -->
       <div class="center flex-1 bg-gray-200 rounded overflow-auto flex items-start justify-center p-4"
         @drop="handleCanvasDrop" @dragover="onCanvasDragOver">
+        <div class="canvas-zoom-wrap" :style="{ transform: 'scale(' + zoom + ')', transformOrigin: 'top left' }">
         <div class="canvas-with-rulers">
           <!-- 顶部 X 标尺 (mm) -->
           <div class="ruler-corner"></div>
@@ -188,6 +199,7 @@
               {{ t("canvas.pageNum", 1, 1) }}<span v-if="config.footerText"> | {{ config.footerText }}</span>
             </div>
           </div>
+        </div>
         </div>
       </div>
 
@@ -473,6 +485,7 @@ const notify = (level: MessageLevel, text: string) => emitMessage(level, text, p
 const storeOf = () => getStore(props.store);
 
 const canvasRef = ref<HTMLElement | null>(null);
+const zoom = ref(1.5); // 短纸(如241x93mm)默认放大，屏幕更易看清；指针坐标由 rect 自动换算
 const showGapGuide = ref(true);
 const TITLE_LINE_HEIGHT = 1.2;
 const PT_PER_MM = 2.835;
@@ -1356,6 +1369,31 @@ const resetToSample = async () => {
 }
 .vbp-btn-primary:hover { background: #1d4ed8; }
 
+
+.canvas-zoom-wrap {
+  transform-origin: top left;
+}
+.canvas-zoom-wrap .ruler-h,
+.canvas-zoom-wrap .ruler-v,
+.canvas-zoom-wrap .canvas {
+  /* 尺寸以 mm 表达，缩放由外层 transform 统一处理 */
+}
+.vbp-zoom {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #374151;
+}
+.vbp-select {
+  border: 1px solid #d1d5db; border-radius: 4px; padding: 1px 4px; font-size: 12px; background: #fff;
+}
+
+.canvas-zoom-wrap {
+  transform-origin: top left;
+}
+.vbp-zoom {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #374151;
+}
+.vbp-select {
+  border: 1px solid #d1d5db; border-radius: 4px; padding: 1px 4px; font-size: 12px; background: #fff;
+}
 </style>
 
 <style>

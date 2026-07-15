@@ -23,6 +23,7 @@ export const en: Record<string, string> = {
   'toolbar.load': 'Load',
   'toolbar.preview': 'Preview',
   'toolbar.viewJson': 'View JSON',
+    'toolbar.zoom': 'Zoom',
   'actions.resetSample': 'Reset Sample',
   'json.title': 'Template Config JSON',
   'json.copy': 'Copy',

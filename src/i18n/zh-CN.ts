@@ -23,6 +23,7 @@ export const zhCN: Record<string, string> = {
   'toolbar.load': '加载',
   'toolbar.preview': '预览',
   'toolbar.viewJson': '查看 JSON',
+    'toolbar.zoom': '缩放',
   'actions.resetSample': '重置示例',
   'json.title': '模板配置 JSON',
   'json.copy': '复制',
