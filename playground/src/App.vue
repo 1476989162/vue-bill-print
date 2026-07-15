@@ -171,11 +171,11 @@ const onPrint = async () => {
     radial-gradient(1200px 500px at 10% -10%, #dbeafe 0%, transparent 55%),
     linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
   color: #0f172a;
-  padding: 24px;
+  padding: 16px;
 }
 .hero {
   max-width: 1200px;
-  margin: 0 auto 16px;
+  margin: 0 auto 10px;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 20px;
@@ -196,7 +196,7 @@ h1 {
   letter-spacing: -0.03em;
 }
 .lead {
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   max-width: 52ch;
   color: #334155;
   line-height: 1.6;
@@ -220,7 +220,7 @@ h1 {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 16px 18px;
+  padding: 12px 14px;
   backdrop-filter: blur(6px);
 }
 .tips ol {
@@ -235,8 +235,8 @@ h1 {
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 8px;
-  height: calc(100vh - 220px);
-  min-height: 520px;
+  height: calc(100vh - 180px);
+  min-height: 560px;
   overflow: hidden;
 }
 .template-switcher { display: flex; gap: 8px; }
