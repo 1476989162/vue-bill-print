@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { PrintDesigner, printBill, getLocale, setLocale } from 'vue-bill-print';
-import { sampleOutbound, samplePurchase, sampleInbound, sampleLabel } from './sampleData';
+import { sampleOutbound, samplePurchase, sampleInbound, sampleLabel, labelTemplate } from './sampleData';
 
 const demoI18n: Record<string, Record<string, string>> = {
   'zh-CN': {
@@ -65,6 +65,9 @@ const templates = [
   const curTpl = ref<typeof templates[number]['key']>('outbound');
   const formType = computed(() => templates.find(x => x.key === curTpl.value)!.formType);
   const curData = computed(() => editableData.value ?? templates.find(x => x.key === curTpl.value)!.data);
+  // 切换模板时同步清空 editableData，让 curData 立即等于新模板数据（否则会有一帧滞后：
+  // formType 已变而 backendData 仍是上一个模板的数据，导致设计器按错误数据解析 {占位符}）
+  const selectTpl = (key: string) => { curTpl.value = key as typeof curTpl.value; editableData.value = null; };
 const showDesigner = ref(true);
 const printing = ref(false);
 
@@ -93,7 +96,9 @@ const applyData = () => {
 const onPrint = async () => {
   printing.value = true;
   try {
-    await printBill({ formType: formType.value, data: curData.value });
+    // 标签模式直接传入 labelTemplate，覆盖设计器默认模板
+    const template = curTpl.value === 'label' ? labelTemplate : undefined;
+    await printBill({ formType: formType.value, data: curData.value, template });
   } finally {
     printing.value = false;
   }
@@ -112,7 +117,7 @@ const onPrint = async () => {
             {{ printing ? demoT('demo.printing') : demoT('demo.print') }}
           </button>
           <div class="template-switcher">
-          <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="curTpl = tpl.key">{{ demoT(tpl.labelKey) }}</button>
+          <button v-for="tpl in templates" :key="tpl.key" class="btn" :class="{ primary: curTpl === tpl.key }" @click="selectTpl(tpl.key)">{{ demoT(tpl.labelKey) }}</button>
         </div>
           <button class="btn" @click="showDesigner = !showDesigner">
             {{ showDesigner ? demoT('demo.hideDesigner') : demoT('demo.showDesigner') }}
@@ -137,7 +142,7 @@ const onPrint = async () => {
     </header>
 
     <section v-if="showDesigner" class="designer-wrap">
-      <PrintDesigner :form-type="formType" :backend-data="curData" />
+      <PrintDesigner :form-type="formType" :backend-data="curData" :print-mode="curTpl === 'label' ? 'label' : 'table'" />
     </section>
 
     <div v-if="dataModalOpen" class="data-modal-mask" @click.self="dataModalOpen = false">

@@ -153,6 +153,8 @@ export interface PrintTemplateConfig {
   footerText: string;
   showPageNumber: boolean;
   version: number;
+  /** 打印模式：'table' = 传统明细表格（默认，兼容旧模板）；'label' = 标签套打，按 TbDetail 每行出一张标签，自由排版，不使用表格 */
+  printMode?: 'table' | 'label';
 }
 
 /** Persist / load template JSON by formType key */
@@ -172,6 +174,8 @@ export interface PrintOptions {
   store?: TemplateStore;
   /** Optional static HTML fallback when no JSON template is saved */
   fallbackHtml?: string;
+  /** 直接传入模板配置（最高优先级，覆盖 store 加载的模板），例如标签套打模板 */
+  template?: PrintTemplateConfig;
   onMessage?: (level: MessageLevel, text: string) => void;
 }
 

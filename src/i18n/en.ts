@@ -35,6 +35,18 @@ export const en: Record<string, string> = {
   'toolbar.gapGuideTitle': 'Show gap guide between title and table',
   'toolbar.overflowWarn': 'Table width exceeds printable area by {0}pt, content may be clipped',
 
+  // ---- Print mode (table / label) ----
+  'mode.title': 'Print mode:',
+  'mode.table': 'Table',
+  'mode.label': 'Label',
+  'mode.newTable': 'New table template',
+  'mode.newLabel': 'New label template',
+  'mode.badgeTable': 'Table',
+  'mode.badgeLabel': 'Label',
+  'mode.labelHint': 'Label mode: one label per TbDetail row (no detail table). Use the "detail" free elements to lay out per-row content; QR/barcode/text may use {field}.',
+  'mode.switchToTable': 'Switching to table mode keeps free elements but detail columns must be re-seeded',
+  'mode.switchToLabel': 'In label mode the detail table is not used; rows are printed individually',
+
   // ---- Left panel ----
   'panel.headerFields': 'Header Fields',
   'panel.detailColumns': 'Detail Columns',
@@ -43,6 +55,8 @@ export const en: Record<string, string> = {
   'panel.text': 'Text',
   'panel.barcode': 'Barcode',
   'panel.qrcode': 'QR Code',
+  'panel.detailHintTable': 'Drag detail fields here to build detail table columns',
+  'panel.detailHintLabel': 'Label mode: drag fields into the detail area to layout per-row content',
 
   // ---- Canvas ----
   'canvas.detailData': 'Detail Data',

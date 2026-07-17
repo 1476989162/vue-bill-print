@@ -181,36 +181,47 @@ export const sampleLabel: BackendData = {
  * 纸张 60mm × 40mm 不干胶标签，四周零边距。
  */
 export const labelTemplate = {
-  paper: { width: 60, height: 40, orientation: 'portrait', marginTop: 0, marginRight: 0, marginBottom: 0, marginLeft: 0 },
+  // 标签套打模式：按 TbDetail 每行出一张独立标签，自由排版，不使用表格
+  printMode: 'label',
+  paper: { width: 80, height: 80, orientation: 'portrait', marginTop: 0, marginRight: 0, marginBottom: 0, marginLeft: 0 },
   sections: {
-    header: { key: 'header', title: '表头', top: 0, height: 113, visible: true, autoFlow: false, printMode: 'every' },
-    detail: { key: 'detail', title: '明细', top: 113, height: 0, visible: false, autoFlow: true },
-    footer: { key: 'footer', title: '表尾', top: 113, height: 0, visible: false, autoFlow: true, printMode: 'last' },
+    header: { key: 'header', title: '表头', top: 0, height: 227, visible: true, autoFlow: false, printMode: 'every' },
+    detail: { key: 'detail', title: '明细', top: 120, height: 100, visible: true, autoFlow: true },
+    footer: { key: 'footer', title: '表尾', top: 227, height: 0, visible: false, autoFlow: true, printMode: 'last' },
   },
   headerFields: [],
+  // 标签模式不使用表格，detailColumns 留空
   detailColumns: [],
-  // 自由元素坐标单位为 pt（1mm ≈ 2.835pt）
+  // 自由元素坐标单位为 pt（1mm ≈ 2.835pt）。
+  // header 区：随每张标签重复的共用内容（QR/条码 + Tb 表头字段）
+  // detail 区：随 TbDetail 当前行变化的字段（项目 / 内容）
   freeElements: [
-    // 二维码：内容 = SN 序列号
-    { type: 'qrcode', left: 4, top: 6, width: 62, height: 62, content: '{SN}', section: 'header' },
-    // 品名（大字）
-    { type: 'text', left: 72, top: 6, width: 96, height: 14, content: '{品名}', fontSize: 11, section: 'header' },
-    // 规格 + 批次
-    { type: 'text', left: 72, top: 24, width: 96, height: 12, content: '规格 {规格}', fontSize: 8, section: 'header' },
-    { type: 'text', left: 72, top: 36, width: 96, height: 12, content: '批次 {批次}  仓位 {仓位}', fontSize: 8, section: 'header' },
-    // 分隔线
-    { type: 'hline', left: 4, top: 74, width: 162, height: 1, section: 'header' },
-    // 条码：EAN-13，内容 = 条码字段
-    { type: 'barcode', left: 4, top: 80, width: 120, height: 30, content: '{条码}', barcodeFormat: 'EAN13', section: 'header' },
-    // 数量
-    { type: 'text', left: 128, top: 88, width: 38, height: 16, content: '{数量}{单位}', fontSize: 10, section: 'header' },
+    // 二维码：内容 = SN 序列号（共用）
+    { type: 'qrcode', left: 6, top: 6, width: 72, height: 72, content: '{SN}', section: 'header' },
+    // 品名（大字，共用）
+    { type: 'text', left: 86, top: 8, width: 138, height: 16, content: '{品名}', fontSize: 13, section: 'header' },
+    // 规格（共用）
+    { type: 'text', left: 86, top: 28, width: 138, height: 14, content: '规格 {规格}', fontSize: 10, section: 'header' },
+    // 批次（共用）
+    { type: 'text', left: 86, top: 46, width: 138, height: 14, content: '批次 {批次}', fontSize: 10, section: 'header' },
+    // 仓位（共用）
+    { type: 'text', left: 86, top: 64, width: 138, height: 14, content: '仓位 {仓位}', fontSize: 10, section: 'header' },
+    // 条码：EAN-13，内容 = 条码字段（共用）
+    { type: 'barcode', left: 86, top: 86, width: 135, height: 30, content: '{条码}', barcodeFormat: 'EAN13', section: 'header' },
+    // 分隔线（共用）
+    { type: 'hline', left: 6, top: 116, width: 218, height: 1, section: 'header' },
+    // —— detail 区：随 TbDetail 每行变化 ——
+    // 项目
+    { type: 'text', left: 6, top: 124, width: 70, height: 16, content: '项目 {项目}', fontSize: 11, section: 'detail' },
+    // 内容
+    { type: 'text', left: 80, top: 124, width: 144, height: 16, content: '内容 {内容}', fontSize: 11, section: 'detail' },
   ],
   summaryRows: [],
-  tableLeft: 10,
-  tableTop: 113,
-  sequenceColumnWidth: 24,
-  detailHeaderHeight: 18,
-  detailRowHeight: 18,
+  tableLeft: 4,
+  tableTop: 120,
+  sequenceColumnWidth: 16,
+  detailHeaderHeight: 14,
+  detailRowHeight: 12,
   allowTableOverflow: true,
   headerNoWrap: true,
   title: '',

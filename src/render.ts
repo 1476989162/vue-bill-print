@@ -450,9 +450,17 @@ const buildFieldsHtml = (
     return `<div style="position:absolute;left:${f.left}pt;top:${f.top + topDelta}pt;font-size:${f.fontSize}pt;width:${f.width}pt;font-weight:${f.bold ? 'bold' : 'normal'};text-align:${f.align};white-space:nowrap;overflow:hidden">${label}<span>${val}</span></div>`;
   }).join('\n  ');
 
-const replacePlaceholders = (text: string, data: BackendData): string =>
+export const replacePlaceholders = (
+  text: string,
+  data: BackendData,
+  detailRow?: Record<string, unknown>,
+): string =>
   text.replace(/\{([^{}]+)\}/g, (_, key: string) => {
     const k = key.trim();
+    // 标签模式下优先取当前明细行字段，回退到 Tb 表头
+    if (detailRow && detailRow[k] != null) {
+      return formatCellValue(detailRow[k], '');
+    }
     const type = getHeaderType(k, data);
     const val = data.Tb?.[k];
     return val == null ? '' : formatCellValue(val, type);
@@ -461,12 +469,13 @@ const replacePlaceholders = (text: string, data: BackendData): string =>
 const generateBarcodeCache = async (
   cfg: PrintTemplateConfig,
   data: BackendData,
+  detailRow?: Record<string, unknown>,
 ): Promise<Map<FreeElementConfig, string>> => {
   const cache = new Map<FreeElementConfig, string>();
   if (typeof document === 'undefined') return cache;
   for (const e of cfg.freeElements) {
     if (e.type !== 'barcode' && e.type !== 'qrcode') continue;
-    const content = replacePlaceholders(e.content || ' ', data) || ' ';
+    const content = replacePlaceholders(e.content || ' ', data, detailRow) || ' ';
     try {
       if (e.type === 'barcode') {
         const canvas = document.createElement('canvas');
@@ -485,10 +494,11 @@ const generateBarcodeCache = async (
 
 const buildFreeHtml = (
   cfg: PrintTemplateConfig,
-  section: 'header' | 'footer',
+  section: 'header' | 'footer' | 'detail',
   data: BackendData,
   barcodeCache?: Map<FreeElementConfig, string>,
   topDelta = 0,
+  detailRow?: Record<string, unknown>,
 ): string =>
   cfg.freeElements.filter(e => (e.section || 'header') === section).map(e => {
     const pos = `position:absolute;left:${e.left}pt;top:${e.top + topDelta}pt`;
@@ -498,7 +508,7 @@ const buildFreeHtml = (
       if (!url) return '';
       return `<img src="${url}" style="${pos};width:${e.width}pt;height:${e.height}pt">`;
     }
-    const content = replacePlaceholders(e.content || '', data);
+    const content = replacePlaceholders(e.content || '', data, detailRow);
     return `<div style="${pos};width:${e.width}pt;font-size:${e.fontSize || 9}pt">${content}</div>`;
   }).join('\n  ');
 
@@ -712,6 +722,37 @@ const buildSinglePageInnerHtml = (
     ${showFooter && cfg.footerText ? `<div style="position:absolute;left:10pt;top:${footerTextTop}pt;font-size:8pt;color:#666">${cfg.footerText}</div>` : ''}`;
 };
 
+/** 标签套打模式：按 TbDetail 每一行生成一张独立标签，自由排版（不使用表格），
+ *  detail 区自由元素解析当前明细行字段（回退 Tb 表头）。table 模式完全不受影响。 */
+const renderLabelMode = async (
+  cfg: PrintTemplateConfig,
+  data: BackendData,
+): Promise<string> => {
+  ensurePrintConfig(cfg);
+  const rows = (data.TbDetail || []) as Record<string, unknown>[];
+  const labelRows = rows.length ? rows : [{} as Record<string, unknown>];
+  const pages = await Promise.all(labelRows.map(async (row, i) => {
+    const cache = await generateBarcodeCache(cfg, data, row);
+    const headerHtml = buildFreeHtml(cfg, 'header', data, cache);
+    const detailHtml = buildFreeHtml(cfg, 'detail', data, cache, 0, row);
+    return `  <div class="print-page" style="page-break-after:${i < labelRows.length - 1 ? 'always' : 'auto'}">
+    <div class="print-page-main">
+  ${headerHtml}
+  ${detailHtml}
+    </div>
+  </div>`;
+  }));
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${cfg.title}</title>
+<style>${buildPrintStyles(cfg)}</style>
+</head>
+<body>
+  ${pages.join('\n')}
+</body>
+</html>`;
+};
+
 /** 从 PrintTemplateConfig 渲染为打印 HTML（按页类型容量分页） */
 export const renderFromConfig = (
   cfg: PrintTemplateConfig,
@@ -777,6 +818,7 @@ export const renderFromConfig = (
 /** 按页类型容量分页渲染：单页含头尾，续页去掉表头 */
 export const renderFromConfigAsync = async (cfg: PrintTemplateConfig, data: BackendData): Promise<string> => {
   ensurePrintConfig(cfg);
+  if (cfg.printMode === 'label') return renderLabelMode(cfg, data);
   const allRows = (data.TbDetail || []) as Record<string, unknown>[];
   const barcodeCache = await generateBarcodeCache(cfg, data);
   const hasSummary = cfg.summaryRows.some(s => s.position === 'footer');
@@ -835,6 +877,8 @@ export interface ResolveTemplateOptions {
   store?: TemplateStore;
   /** Static HTML string used when no JSON designer template is saved */
   fallbackHtml?: string;
+  /** 直接传入模板配置（最高优先级，覆盖 store 加载的模板） */
+  template?: PrintTemplateConfig;
 }
 
 /**
@@ -844,6 +888,9 @@ export interface ResolveTemplateOptions {
 export const getHtmlTemplate = async (opts: ResolveTemplateOptions): Promise<string | null> => {
   const { formType, data, fallbackHtml } = opts;
   const store = getStore(opts.store);
+
+  // 最高优先级：直接传入的模板配置
+  if (opts.template) return renderFromConfigAsync(opts.template, data as BackendData);
 
   if (data) {
     try {
@@ -891,13 +938,14 @@ const formatValue = (val: unknown) => val == null || val === '' ? '' : String(va
 export const htmlPrint = async (
   formType: string,
   backendData: BackendData,
-  opts?: { store?: TemplateStore; fallbackHtml?: string; onMessage?: (level: 'error' | 'warning' | 'success' | 'info', text: string) => void },
+  opts?: { store?: TemplateStore; fallbackHtml?: string; template?: PrintTemplateConfig; onMessage?: (level: 'error' | 'warning' | 'success' | 'info', text: string) => void },
 ): Promise<void> => {
   const template = await getHtmlTemplate({
     formType,
     data: backendData,
     store: opts?.store,
     fallbackHtml: opts?.fallbackHtml,
+    template: opts?.template,
   });
   if (!template) {
     emitMessage('error', st('render.templateNotFound', formType), opts?.onMessage);

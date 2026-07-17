@@ -102,7 +102,7 @@ configure({ store: apiStore })
 
 ### SQLite 完整示例
 
-`examples/sqlite-backend/` 提供了一个开箱即用的 **SQLite** 后端（Express + better-sqlite3），演示 `load / save / remove` 三个接口，以及如何从数据库表组装 `BackendData`：
+`examples/sqlite-backend/` 提供了一个开箱即用的 **SQLite** 后端（Express + 内置 `node:sqlite`，无需原生编译），演示 `load / save / remove` 三个接口，以及如何从数据库表组装 `BackendData`：
 
 ```bash
 cd examples/sqlite-backend
@@ -176,7 +176,7 @@ vue-bill-print/
 │   ├── i18n/              # 国际化（zh-CN / en）
 │   └── PrintDesigner.vue  # 可视化设计器
 ├── examples/
-│   └── sqlite-backend/    # SQLite 后端对接示例（Express + better-sqlite3）
+│   └── sqlite-backend/    # SQLite 后端对接示例（Express + 内置 node:sqlite）
 ├── docs/
 │   ├── data-structure.md  # 数据结构 / TbHeaders / TbDetailHeaders 详解
 │   └── label-qrcode.md    # 标签二维码 / 条码示例

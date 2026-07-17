@@ -11,21 +11,25 @@
 // 另外附带一张「单据业务表」示例（bill / bill_detail），演示后端如何把
 // 真实业务数据组装成前端需要的 BackendData（Tb / TbDetail / TbHeaders …）。
 //
+// 本示例使用 Node.js 内置的 node:sqlite（Node ≥ 22.5），无需原生编译、
+// 零额外依赖，开箱即用。如需换 MySQL / PostgreSQL，只需把下面 3 条
+// SQL（load / save / remove）换成对应驱动即可，接口契约和前端代码都不变。
+//
 // 运行：
-//   npm install
+//   npm install      # node:sqlite 无需编译，安装即可
 //   npm start        # 默认 http://localhost:3001
 // ---------------------------------------------------------------------------
 
 import express from 'express';
 import cors from 'cors';
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new Database(join(__dirname, 'bill-print.db'));
+const db = new DatabaseSync(join(__dirname, 'bill-print.db'));
 // WAL 提升并发读写；个别网络盘/挂载盘不支持，失败则回退默认模式，不影响功能。
-try { db.pragma('journal_mode = WAL'); } catch { /* fallback to default rollback journal */ }
+try { db.exec('PRAGMA journal_mode = WAL;'); } catch { /* fallback to default rollback journal */ }
 
 // ---------------------------------------------------------------------------
 // 1. 建表
@@ -70,8 +74,8 @@ db.exec(`
 // ---------------------------------------------------------------------------
 // 2. 预置一条示例单据（仅首次运行时插入）
 // ---------------------------------------------------------------------------
-const seed = db.prepare('SELECT COUNT(*) AS n FROM bill').get();
-if (seed.n === 0) {
+const seedCount = db.prepare('SELECT COUNT(*) AS n FROM bill').get();
+if (seedCount.n === 0) {
   const insertBill = db.prepare(`
     INSERT INTO bill (form_type, bill_no, customer, warehouse, clerk, bill_date, remark)
     VALUES (@form_type, @bill_no, @customer, @warehouse, @clerk, @bill_date, @remark)

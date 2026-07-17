@@ -35,6 +35,18 @@ export const zhCN: Record<string, string> = {
   'toolbar.gapGuideTitle': '显示标题与表格间距辅助线',
   'toolbar.overflowWarn': '表宽超出可打印区 {0}pt，内容可能被裁剪',
 
+  // ---- 打印模式（表格 / 标签） ----
+  'mode.title': '打印模式：',
+  'mode.table': '表格模式',
+  'mode.label': '标签模式',
+  'mode.newTable': '新建普通模板',
+  'mode.newLabel': '新建标签模板',
+  'mode.badgeTable': '表格',
+  'mode.badgeLabel': '标签',
+  'mode.labelHint': '标签模式：按 TbDetail 每一行生成一张独立标签，不使用明细表格，请用「detail 区」自由元素排版逐行内容（二维码/条码/文本可写 {字段}）。',
+  'mode.switchToTable': '切换到表格模式会保留画布自由元素，但明细表需重新铺列',
+  'mode.switchToLabel': '切换到标签模式后，明细表格不再使用，改为按行套打',
+
   // ---- 左侧面板 ----
   'panel.headerFields': '表头字段',
   'panel.detailColumns': '明细列',
@@ -43,6 +55,8 @@ export const zhCN: Record<string, string> = {
   'panel.text': '文本',
   'panel.barcode': '条码',
   'panel.qrcode': '二维码',
+  'panel.detailHintTable': '把明细字段拖到此处生成明细表列',
+  'panel.detailHintLabel': '标签模式：把字段拖到 detail 区自由排版，按 TbDetail 逐行套打',
 
   // ---- 画布 ----
   'canvas.detailData': '明细数据',

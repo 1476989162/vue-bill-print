@@ -1,6 +1,6 @@
 {
   "name": "vue-bill-print",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Vue 3 bill print designer: drag-and-drop templates, custom paper (incl. pin/dot-matrix), HTML print without hiprint",
   "type": "module",
   "main": "./dist/vue-bill-print.umd.cjs",

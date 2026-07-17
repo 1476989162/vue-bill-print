@@ -16,6 +16,7 @@ export const printBill = async (options: PrintOptions): Promise<void> => {
   await htmlPrint(options.formType, options.data, {
     store: options.store,
     fallbackHtml: options.fallbackHtml,
+    template: options.template,
     onMessage: options.onMessage,
   });
 };

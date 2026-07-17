@@ -3,6 +3,16 @@
   <div class="print-designer flex flex-col designer-root">
     <!-- 工具栏 -->
     <div class="toolbar flex items-center gap-1 bg-gray-100 p-2 rounded mb-1 flex-wrap text-xs">
+      <!-- 打印模式切换：一眼区分表格 / 标签 -->
+      <span class="font-medium">{{ t("mode.title") }}</span>
+      <button type="button" :class="['vbp-btn', config.printMode !== 'label' ? 'vbp-btn-primary' : '']"
+        @click="setMode('table')">{{ t('mode.table') }}</button>
+      <button type="button" :class="['vbp-btn', config.printMode === 'label' ? 'vbp-btn-primary' : '']"
+        @click="setMode('label')">{{ t('mode.label') }}</button>
+      <span class="px-1.5 py-0.5 rounded text-white text-xs"
+        :class="config.printMode === 'label' ? 'bg-purple-600' : 'bg-blue-600'">{{ config.printMode === 'label' ? t('mode.badgeLabel') : t('mode.badgeTable') }}</span>
+
+      <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
       <span class="font-medium">{{ t("toolbar.paper") }}</span>
       <button type="button" v-for="(v, t) in paperPresets" :key="t" :class="['vbp-btn', curPaperType === t ? 'vbp-btn-primary' : '']" 
         @click="setPaper(t, v)">{{ t }}</button>
@@ -35,6 +45,7 @@
         class="w-10 border rounded px-0.5 text-xs" />
 
       <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
+      <template v-if="config.printMode !== 'label'">
       <span class="font-medium">{{ t("toolbar.rowsPerPage") }}</span><input v-model.number="config.rowsPerPage"
         type="number" class="w-12 border rounded px-0.5 text-xs" min="1" :title="t('toolbar.rowsPerPageTitle')" />
       <span class="text-gray-500 text-xs" :title="t('toolbar.singleHint', suggestedRows, continuationRows)">
@@ -44,12 +55,16 @@
       <span v-if="tableOverflowPt > 0" class="text-red-600">超宽 {{ (tableOverflowPt / PT_PER_MM).toFixed(1) }}mm</span>
       <label class="flex items-center gap-0.5 ml-1"><input type="checkbox" v-model="repeatHeaderComputed" />{{ t('toolbar.repeatHeader') }}</label>
       <label class="flex items-center gap-0.5"><input type="checkbox" v-model="config.repeatColumnHeader" />{{ t('toolbar.repeatColHeader') }}</label>
+      </template>
+      <span v-else class="text-purple-700 text-xs bg-purple-50 border rounded px-1.5 py-0.5" :title="t('mode.labelHint')">{{ t('mode.switchToLabel') }}</span>
       <label class="flex items-center gap-0.5 ml-1" :title="t('toolbar.gapGuideTitle')"><input type="checkbox"
           v-model="showGapGuide" /> {{ t("toolbar.gapGuide") }}</label>
 
       <div class="border-r border-gray-300 mx-1" style="height:1em"></div>
       <button type="button" class="vbp-btn vbp-btn-primary"   @click="saveConfig">{{ t('toolbar.save') }}</button>
       <button type="button" class="vbp-btn"  @click="loadConfig">{{ t('toolbar.load') }}</button>
+      <button type="button" class="vbp-btn"  @click="newTemplate('table')">{{ t('mode.newTable') }}</button>
+      <button type="button" class="vbp-btn"  @click="newTemplate('label')">{{ t('mode.newLabel') }}</button>
       <button type="button" class="vbp-btn"  @click="resetToSample">{{ t('actions.resetSample') }}</button>
       <button type="button" class="vbp-btn"  @click="previewPrint">{{ t('toolbar.preview') }}</button>
       <button type="button" class="vbp-btn"  @click="openJson">{{ t('toolbar.viewJson') }}</button>
@@ -76,9 +91,10 @@
           class="field-item px-2 py-0.5 mb-0.5 text-xs bg-blue-50 border rounded cursor-grab select-none"
           draggable="true" @dragstart="onDragStart($event, 'header', f)">{{ f.title }}</div>
         <div class="text-xs font-medium mt-2 mb-1">{{ t("panel.detailColumns") }}</div>
-        <div v-for="c in detailFields" :key="c.key"
+        <div v-if="config.printMode !== 'label'" v-for="c in detailFields" :key="c.key"
           class="field-item px-2 py-0.5 mb-0.5 text-xs bg-green-50 border rounded cursor-grab select-none"
           draggable="true" @dragstart="onDragStart($event, 'detail', c)">{{ c.title }}</div>
+        <div v-if="config.printMode === 'label'" class="text-xs text-purple-700 bg-purple-50 border rounded p-1.5 mb-0.5 leading-relaxed">{{ t('panel.detailHintLabel') }}</div>
         <div class="text-xs font-medium mt-2 mb-1">{{ t("panel.freeElements") }}</div>
         <div class="field-item px-2 py-0.5 mb-0.5 text-xs bg-gray-100 border rounded cursor-grab select-none"
           draggable="true" @dragstart="onDragStart($event, 'free', { type: 'hline' })">{{ t('panel.hLine') }}</div>
@@ -470,7 +486,7 @@ import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from
 import type { BackendData, PrintSectionConfig, PrintSectionKey, PrintTemplateConfig, TemplateStore, MessageLevel } from './types';
 import { normalizeBackendData } from './types';
 import { getStore, emitMessage } from './storage';
-import { getTitleTopPt, DEFAULT_ROWS_PER_PAGE, computeMaxFittingRows, computeContinuationFittingRows, renderFromConfigAsync } from './render';
+import { getTitleTopPt, DEFAULT_ROWS_PER_PAGE, computeMaxFittingRows, computeContinuationFittingRows, renderFromConfigAsync, replacePlaceholders } from './render';
 import { getBuiltinDefault } from './defaultTemplates';
 import JsBarcode from 'jsbarcode';
 import * as QRCode from 'qrcode';
@@ -478,10 +494,17 @@ import * as QRCode from 'qrcode';
 const props = defineProps<{
   formType: string;
   backendData: BackendData | null;
+  /** 强制初始打印模式（表格/标签）。由外部（如 playground 的模板类型）驱动；组件内也可手动切换 */
+  printMode?: 'table' | 'label';
   /** Inject template persistence; defaults to configure()/localStorage */
   store?: TemplateStore;
   onMessage?: (level: MessageLevel, text: string) => void;
 }>();
+
+// 外部驱动初始打印模式（如 playground 物流标签按钮）：prop 变化时覆盖，但不阻止组件内手动切换
+watch(() => props.printMode, (m) => {
+  if (m && m !== config.printMode) config.printMode = m;
+}, { immediate: true });
 
 const notify = (level: MessageLevel, text: string) => emitMessage(level, text, props.onMessage);
 const storeOf = () => getStore(props.store);
@@ -527,7 +550,8 @@ const createDefaultSections = () => {
 };
 
 // 按模板返回一份「空白基础 config」（整份重置用，字段数组留空由 seedFromBackend / 内置默认填充）
-const createBaseConfig = (formType: string): PrintTemplateConfig => {
+// mode: 'table' 普通单据（明细表格）；'label' 标签套打（按 TbDetail 逐行出多张）
+const createBaseConfig = (formType: string, mode: 'table' | 'label' = 'table'): PrintTemplateConfig => {
   const common = {
     headerFields: [] as any[], detailColumns: [] as any[], freeElements: [] as any[], summaryRows: [] as any[],
     tableLeft: 10,
@@ -539,6 +563,28 @@ const createBaseConfig = (formType: string): PrintTemplateConfig => {
     titleMarginBottom: 1, rowsPerPage: DEFAULT_ROWS_PER_PAGE, repeatHeader: true, repeatColumnHeader: true,
     footerText: '', showPageNumber: true, version: 3,
   };
+  // 标签模式基础模板：80×80mm，按 TbDetail 逐行套打，freeElements 含示例
+  if (mode === 'label') {
+    return {
+      ...common,
+      printMode: 'label',
+      paper: { kind: 'custom', widthMm: 80, heightMm: 80, orientation: 'portrait', marginTop: 4, marginRight: 4, marginBottom: 4, marginLeft: 4 } as any,
+      sections: createDefaultSections(),
+      tableTop: 70,
+      title: formType || t('mode.label'),
+      freeElements: [
+        { id: 'lab-qr', type: 'qrcode', content: '{SN}', left: 6, top: 6, width: 72, height: 72, section: 'header', fontSize: 0, barcodeFormat: '' } as any,
+        { id: 'lab-name', type: 'text', content: '{品名}', left: 84, top: 8, width: 130, height: 16, section: 'header', fontSize: 12, bold: true } as any,
+        { id: 'lab-spec', type: 'text', content: '规格 {规格}', left: 84, top: 28, width: 130, height: 14, section: 'header', fontSize: 9 } as any,
+        { id: 'lab-batch', type: 'text', content: '批次 {批次}', left: 84, top: 46, width: 130, height: 14, section: 'header', fontSize: 9 } as any,
+        { id: 'lab-pos', type: 'text', content: '仓位 {仓位}', left: 84, top: 64, width: 130, height: 14, section: 'header', fontSize: 9 } as any,
+        { id: 'lab-hline', type: 'hline', content: '', left: 6, top: 116, width: 227, height: 0, section: 'header', fontSize: 0 } as any,
+        { id: 'lab-bc', type: 'barcode', content: '{条码}', barcodeFormat: 'EAN13', left: 84, top: 122, width: 135, height: 30, section: 'detail', fontSize: 0 } as any,
+        { id: 'lab-item', type: 'text', content: '项目 {项目}', left: 6, top: 122, width: 70, height: 14, section: 'detail', fontSize: 9 } as any,
+        { id: 'lab-val', type: 'text', content: '内容 {内容}', left: 6, top: 140, width: 220, height: 14, section: 'detail', fontSize: 9 } as any,
+      ],
+    } as PrintTemplateConfig;
+  }
   if (formType === '销售出库') {
     return {
       ...common,
@@ -565,6 +611,7 @@ const createBaseConfig = (formType: string): PrintTemplateConfig => {
 // 配置
 const config = reactive<PrintTemplateConfig>({
   paper: { width: 148, height: 210, orientation: 'portrait', marginTop: 8, marginRight: 6, marginBottom: 8, marginLeft: 6 },
+  printMode: 'table',
   sections: createDefaultSections(),
   headerFields: [], detailColumns: [], freeElements: [], summaryRows: [],
   tableLeft: 10, tableTop: 120,
@@ -664,27 +711,35 @@ const visibleFreeElements = computed(() =>
 const dataUrlCache = reactive<Record<number, string>>({});
 const regenerateBarcodes = async () => {
   if (typeof document === 'undefined') return;
+  const data = normalizeBackendData(props.backendData);
   for (let i = 0; i < config.freeElements.length; i++) {
     const e = config.freeElements[i];
     if (e.type !== 'barcode' && e.type !== 'qrcode') continue;
+    // 设计器预览也要把 {键} 占位符解析成 Tb 表头值，否则条码/二维码会是字面量（EAN13 会因非法而被静默跳过）
+    const content = replacePlaceholders(e.content || ' ', data) || ' ';
     try {
       if (e.type === 'barcode') {
         const canvas = document.createElement('canvas');
-        JsBarcode(canvas, e.content || ' ', {
+        JsBarcode(canvas, content, {
           format: e.barcodeFormat || 'CODE128',
           width: 2, height: 50, displayValue: true, fontSize: 8, margin: 2,
         });
         dataUrlCache[i] = canvas.toDataURL('image/png');
       } else {
-        dataUrlCache[i] = await QRCode.toDataURL(e.content || ' ', { width: 200, margin: 1 });
+        dataUrlCache[i] = await QRCode.toDataURL(content, { width: 200, margin: 1 });
       }
     } catch {
       delete dataUrlCache[i];
     }
   }
 };
+// 同时依赖 backendData：切换模板时表头数据会滞后于自由元素，
+// 若只监听 freeElements，条码/二维码会先按旧数据解析（EAN13 解析为空被 JsBarcode 抛错静默跳过）
 watch(
-  () => config.freeElements.map(e => `${e.type}|${e.content}|${e.barcodeFormat}`),
+  [
+    () => config.freeElements.map(e => `${e.type}|${e.content}|${e.barcodeFormat}`),
+    () => props.backendData,
+  ],
   regenerateBarcodes,
   { deep: true },
 );
@@ -1037,6 +1092,22 @@ const loadConfig = async () => {
   } catch (err) { notify('error', t('notify.loadFailed', String(err))); }
 };
 
+// 切换打印模式：保留画布自由元素，仅切换引擎（表格表格 vs 标签套打）
+const setMode = (mode: 'table' | 'label') => {
+  if (config.printMode === mode) return;
+  config.printMode = mode;
+  notify('info', mode === 'label' ? t('mode.switchToLabel') : t('mode.switchToTable'));
+};
+
+// 新建模板：按类型生成空白基础 config（普通单据 / 标签套打）
+const newTemplate = (mode: 'table' | 'label') => {
+  Object.assign(config, createBaseConfig(props.formType || '', mode));
+  normalizeLoadedConfig();
+  if (props.backendData) seedFromBackend();
+  normalizeLoadedConfig();
+  notify('info', mode === 'label' ? t('mode.newLabel') : t('mode.newTable'));
+};
+
 const showJson = ref(false);
 const jsonText = computed(() => JSON.stringify(config, null, 2));
 const openJson = () => { showJson.value = true; };
@@ -1144,20 +1215,27 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onKeyDown);
 });
 
-// 切换模板 / 后端数据时，若该 formType 无自定义保存则按示例重铺字段
+// 切换模板 / 后端数据时：有已保存模板则载入它，否则按示例重铺字段
 watch(
   () => [props.formType, props.backendData],
   async () => {
     if (!props.backendData) return;
-    let hasSaved = false;
+    let templateJson: string | null = null;
     try {
-      const tj = await storeOf().load(props.formType);
-      hasSaved = !!tj;
-    } catch { hasSaved = false; }
-    if (hasSaved) return;
-    config.headerFields = [];
-    config.detailColumns = [];
-    applyBuiltinOrDefault();
+      templateJson = await storeOf().load(props.formType);
+    } catch { templateJson = null; }
+    if (templateJson) {
+      // 载入该 formType 已保存/预置的模板（如 playground 预置的「物流标签」）
+      Object.assign(config, JSON.parse(templateJson));
+      normalizeLoadedConfig();
+      if (!config.headerFields?.length && !config.detailColumns?.length && !config.freeElements?.length) {
+        seedFromBackend();
+      }
+    } else {
+      config.headerFields = [];
+      config.detailColumns = [];
+      applyBuiltinOrDefault();
+    }
   }
 );
 
