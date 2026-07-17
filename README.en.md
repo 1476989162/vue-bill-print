@@ -9,7 +9,7 @@
 
 Vue 3 bill print designer: drag-and-drop template, custom paper (incl. dot-matrix/continuous forms), page-kind-aware pagination, pure HTML print (no hiprint).
 
-> Version `0.1.0`: runnable open-source skeleton. The production rendering engine has been extracted into the library; UI is self-contained (no UnoCSS/Tailwind dependency). Designer CSS, alias fields, and multi-template demos are now complete.
+> Version `0.2.0`: runnable open-source skeleton. The production rendering engine has been extracted into the library; UI is self-contained (no UnoCSS/Tailwind dependency). Designer CSS, alias fields, and multi-template demos are now complete. New **label print mode** (`printMode: 'label'`): one label per `TbDetail` row, mixing QR / barcode / text, free of table constraints.
 
 ## Demo
 
@@ -22,7 +22,8 @@ Open the [online playground](http://localhost:5177) to try live. Switch between 
 ## Features
 
 - Visual designer: header fields / detail columns / hline / text / barcode / QR
-- Custom paper (A3/A4/A5/B5/custom), adjustable margins
+- Two print modes: **table mode** (document printing) + **label print mode** (one independent label per detail row, free-element layout with QR + EAN-13 barcode); switch from the designer top bar with a current-mode badge
+- Custom paper (A3/A4/A5/B5/custom; labels often 80×80mm), adjustable margins
 - Dot-matrix friendly: `@page { margin: 0 }` + design margin as padding, avoids Chrome "margins: none" scaling glitches
 - Page-kind pagination: first / continuation / last with different row capacities; header on first page only; footer sticks to table bottom
 - Pluggable template store (localStorage / your API)
@@ -157,8 +158,10 @@ pnpm run build:lib         # vite build + declaration emit
 - [x] `header` / `details` / `headerMeta` / `detailMeta` alias fields
 - [x] Multiple demos (Sales / Purchase / Stock-In)
 - [x] English documentation
-- [ ] First npm publish
-- [ ] `v0.1.0` tagged release via CI
+- [x] First npm publish (`vue-bill-print@0.2.0`)
+- [x] `v0.2.0` tagged release via CI
+- [x] Label print mode (`printMode: 'label'` + designer table/label mode toggle)
+- [x] SQLite example switched to built-in `node:sqlite` (zero native build)
 - [ ] More built-in templates (quotation, delivery note)
 - [ ] Print preview within page (avoid `window.open` popup blocker)
 
